@@ -14,9 +14,17 @@
 
 ### 分析
 
-- socket是使用TCP协议为我们建立了传输层的连接，因此我们要实现基因应用层HTTP协议的通信应用
+- socket是使用TCP协议为我们建立了传输层的连接，因此我们要实现基于应用层HTTP协议的通信应用
   - 约束客户端服务端的通信内容，达到实现协议的目的
-- 功能是实现注册登录
+- 功能是实现**注册登录**
 
-![时序图](https://courseimg-loopchen.oss-cn-guangzhou.aliyuncs.com/Computer_Network/project_img/%E6%97%B6%E5%BA%8F%E5%9B%BE.png?Expires=1620820689&OSSAccessKeyId=TMP.3KiUrvCidUDCD3ib2pKGNRkhTXFBdyhA6WNY7fuVuq2s8LaH1ryzzkSjCDx24WHwUUKT2fSQ3TPz7uR5uNALzFkPNkk56r&Signature=B26WsJE%2FICZK%2F%2Fz0294cDVqnX5A%3D)
+![时序图](https://courseimg-loopchen.oss-cn-guangzhou.aliyuncs.com/Computer_Network/project_img/%E6%97%B6%E5%BA%8F%E5%9B%BE.png)
+
+### 
+
+### 项目规格
+
+- 使用BIO（可以用线程和线程池）
+- 客户端采用GUI
+- 无需持久化，因此重启客户端即会清空之前注册记录
 
