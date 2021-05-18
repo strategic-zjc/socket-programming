@@ -39,6 +39,6 @@ public class HttpResponse implements Component {
 
     @Override
     public String toText() {
-        return statusLine.toText() + headers.toText() + '\n' + body.toText();
+        return statusLine.toText() + headers.toText() + '\n'+ body.toText();
     }
 }

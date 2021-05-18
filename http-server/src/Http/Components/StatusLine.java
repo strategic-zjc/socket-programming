@@ -15,4 +15,10 @@ public class StatusLine implements Component{
     public String toText() {
         return String.format("HTTP/%.1f %d %s\n", version, code, text);
     }
+
+    public static StatusLine String2StatusLine(String s){
+        String[] tmp = s.split(" ");
+        double version = Double.parseDouble(tmp[0].split("/")[1]);
+        return new StatusLine(version, Integer.parseInt(tmp[1]), tmp[2]);
+    }
 }
