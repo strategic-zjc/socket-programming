@@ -1,4 +1,7 @@
 
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -39,5 +42,9 @@ public class SimpleServer {
 
     private void handle(String message){
         // do something
+    }
+
+    private void sentToAll(String msg){
+
     }
 }
