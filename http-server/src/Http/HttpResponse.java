@@ -38,7 +38,19 @@ public class HttpResponse implements Component {
     }
 
     @Override
-    public String toText() {
-        return statusLine.toText() + headers.toText() + '\n'+ body.toText();
+    public String ToString() {
+        return statusLine.ToString() + headers.ToString() + '\n'+ body.ToString();
+    }
+
+    @Override
+    public byte[] ToBytes() {
+        byte[] statusLine_b = statusLine.ToBytes();
+        byte[] headers_b = headers.ToBytes();
+        byte[] body_b = body.ToBytes();
+        byte[] ret = new byte[statusLine_b.length + headers_b.length + body_b.length];
+        System.arraycopy(statusLine_b, 0, ret, 0, statusLine_b.length);
+        System.arraycopy(headers_b, 0, ret, statusLine_b.length, headers_b.length);
+        System.arraycopy(body_b, 0, ret, statusLine_b.length + headers_b.length, body_b.length);
+        return ret;
     }
 }

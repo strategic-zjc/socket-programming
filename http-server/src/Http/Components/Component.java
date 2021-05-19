@@ -1,5 +1,7 @@
 package Http.Components;
 
 public interface Component {
-    public String toText();
+    public String ToString();
+
+    public byte[] ToBytes();
 }

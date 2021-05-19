@@ -19,6 +19,7 @@ public class SimpleServer {
         clientOutputStreams  = new ArrayList<>(); // 初始化
         try {
             ServerSocket serverSocket = new ServerSocket(5000);// 先创建一个
+            System.out.println("http://localhost:5000");
 
             while(true){
                 Socket socket = serverSocket.accept();
