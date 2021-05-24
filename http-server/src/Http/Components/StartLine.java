@@ -48,7 +48,7 @@ public class StartLine implements Component{
     }
 
     public static StartLine String2StartLine(String s){
-        String[] tmp = s.split(" ");
+        String[] tmp = s.split("\\s+");
         double version = Double.parseDouble(tmp[2].split("/")[1]);
         return new StartLine(tmp[0], tmp[1], version);
     }

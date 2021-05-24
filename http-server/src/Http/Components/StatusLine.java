@@ -24,7 +24,7 @@ public class StatusLine implements Component{
     }
 
     public static StatusLine String2StatusLine(String s){
-        String[] tmp = s.split(" ");
+        String[] tmp = s.split("\\s+");
         double version = Double.parseDouble(tmp[0].split("/")[1]);
         return new StatusLine(version, Integer.parseInt(tmp[1]), tmp[2]);
     }

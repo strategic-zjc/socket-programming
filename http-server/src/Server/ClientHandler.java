@@ -1,3 +1,4 @@
+package Server;
 
 import Http.Components.Body;
 import Http.Components.Headers;
@@ -105,14 +106,13 @@ public class ClientHandler implements Runnable {
     public void run() {
         // read all bytes from socket stream
         try {
-
             String line;
             StringBuffer sb = new StringBuffer();
             while((line = inFromClient.readLine()) != null){
                 sb.append(line + '\n');
                 if(line.isEmpty())
                     break;
-            } // todo
+            }
 
             if(sb.toString().equals("")) return;
             HttpRequest request = Util.String2Request(sb.toString());
@@ -127,12 +127,12 @@ public class ClientHandler implements Runnable {
                 executor = new GetExecutor();
 
             }else if (method.equals("POST")){
-                executor = new PostExecutor();
+                executor = new PostExecutor(inFromClient);
             }
-            executor.handle(request);
+            HttpResponse response = executor.handle(request);
 
 
-            if(target.equals("/")){
+            /*if(target.equals("/")){
                 target = "/index.html";
             }
             else if(target.startsWith("http://")){
@@ -163,7 +163,7 @@ public class ClientHandler implements Runnable {
                     bytesArray);
 
             HttpResponse response = new HttpResponse(statusLine, headers, body);
-
+*/
             outToClient.write(response.ToBytes());
             //timer 如果再次收到请求，重置timer，否则就关闭
             //

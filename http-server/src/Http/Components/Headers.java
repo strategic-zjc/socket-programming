@@ -6,7 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Headers implements Component{
-    HashMap<String, String> headers;
+    private HashMap<String, String> headers;
+
 
     public Headers() {
         this.headers = new HashMap<>();
@@ -25,6 +26,9 @@ public class Headers implements Component{
         sb.append('\n');
         return sb.toString();
     }
+    public String getValue(String key){
+        return headers.get(key);
+    }
 
     @Override
     public byte[] ToBytes() {
@@ -32,7 +36,7 @@ public class Headers implements Component{
     }
 
     public void addHeader(String s){
-        String[] tmp = s.split(": ");
-        this.addHeader(tmp[0], tmp[1]);
+        String[] tmp = s.split(":");
+        this.addHeader(tmp[0].trim(), tmp[1].trim());
     }
 }
