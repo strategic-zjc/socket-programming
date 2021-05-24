@@ -5,6 +5,10 @@ import Http.Components.StatusLine;
 import Http.HttpRequest;
 import Http.HttpResponse;
 import Http.Util;
+import RequestExecutor.BasicExecutor;
+import RequestExecutor.DummyExecutor;
+import RequestExecutor.GetExecutor;
+import RequestExecutor.PostExecutor;
 
 import java.io.*;
 import java.net.Socket;
@@ -108,12 +112,26 @@ public class ClientHandler implements Runnable {
                 sb.append(line + '\n');
                 if(line.isEmpty())
                     break;
-            }
+            } // todo
 
             if(sb.toString().equals("")) return;
             HttpRequest request = Util.String2Request(sb.toString());
+
             String target = request.getStartLine().getTarget();
             // redirect
+
+
+            String method = request.getStartLine().getMethod();
+            BasicExecutor executor = new DummyExecutor();
+            if(method.equals("GET")) {
+                executor = new GetExecutor();
+
+            }else if (method.equals("POST")){
+                executor = new PostExecutor();
+            }
+            executor.handle(request);
+
+
             if(target.equals("/")){
                 target = "/index.html";
             }
@@ -125,6 +143,8 @@ public class ClientHandler implements Runnable {
 
             StatusLine statusLine = new StatusLine(1.1, 200, "OK");
             Headers headers = new Headers();
+
+
             if(f.getName().endsWith(".html")) {
                 headers.addHeader("Content-Type", "text/html");
             }
@@ -139,12 +159,14 @@ public class ClientHandler implements Runnable {
             fis.read(bytesArray); //read file into bytes[]
             fis.close();
 
-            Body body = new Body(bytesArray);
+            Body body = new Body(
+                    bytesArray);
 
             HttpResponse response = new HttpResponse(statusLine, headers, body);
 
             outToClient.write(response.ToBytes());
-
+            //timer 如果再次收到请求，重置timer，否则就关闭
+            //
             outToClient.close();
         } catch (Exception e) {
             e.printStackTrace();

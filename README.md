@@ -9,7 +9,8 @@
    - HTTP 客户端对 301、302、304 的状态码做相应的处理 
    - HTTP 服务器端支持 GET 和 POST 请求 
    - HTTP 服务器端支持 200、301、302、304、404、405、500 的状态码 
-   - HTTP 服务器端实现长连接 3.6 MIME 至少支持三种类型，包含一种非文本类型 
+   - HTTP 服务器端实现长连接 
+   - MIME 至少支持三种类型，包含一种非文本类型 
 4. 基于以上的要求，实现注册，登录功能(数据无需持久化，存在内存中即可， 只需要实现注册和登录的接口，可以使用 postman 等方法模拟请求发送，无需客 户端)。
 
 ### 分析
@@ -20,11 +21,17 @@
 
 ![时序图](https://courseimg-loopchen.oss-cn-guangzhou.aliyuncs.com/Computer_Network/project_img/%E6%97%B6%E5%BA%8F%E5%9B%BE.png)
 
-### 
 
-### 项目规格
 
-- 使用BIO（可以用线程和线程池）
-- 客户端采用GUI
-- 无需持久化，因此重启客户端即会清空之前注册记录
+### todo
 
+- 实现HTTP/1.1
+
+- [了解 HTTP/1.1Message Header和Message Body的内容](https://datatracker.ietf.org/doc/html/rfc2616)
+
+- 了解每种状态码，并对client的请求作出回复
+
+### 思路
+
+- client用命令行输入HTTP报文
+- 
