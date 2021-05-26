@@ -22,6 +22,10 @@ public class Body implements Component{
         this.data = s.getBytes(StandardCharsets.UTF_8);
     }
 
+    public void setData(byte[] b){
+        this.data = b;
+    }
+
     public void append(String s){
         String tmp = new String(this.data);
         this.data = (tmp + s).getBytes();

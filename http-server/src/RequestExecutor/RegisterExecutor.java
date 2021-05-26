@@ -51,7 +51,7 @@ public class RegisterExecutor extends BasicExecutor{
                 String hint = "You have successfully registered!";
                 response = new HttpResponse(new StatusLine(1.1, 200, "OK"), new Headers(), new Body(hint));
             } else {
-                String hint = "用户名重复";
+                String hint = "Username duplicated";
                 response = new HttpResponse(new StatusLine(1.1, 200, "OK"), new Headers(), new Body(hint));
             }
         }

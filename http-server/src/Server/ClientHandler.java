@@ -7,6 +7,7 @@ import Http.HttpRequest;
 import Http.HttpResponse;
 import Http.Util;
 import RequestExecutor.BasicExecutor;
+import RequestExecutor.StaticResourceHandler;
 
 import java.io.*;
 import java.net.Socket;
@@ -65,17 +66,23 @@ public class ClientHandler implements Runnable {
             String target = request.getStartLine().getTarget();
             String method = request.getStartLine().getMethod();
 
+            HttpResponse response = null;
             BasicExecutor executor = null;
 
-            // 在持有的executor中找到合适的，用这个executor处理请求
-            for(BasicExecutor e : SimpleServer.Executors){
-                if(target.endsWith(e.getUrl()) && method.toLowerCase().equals(e.getMethod().toLowerCase())) {
-                    executor = e;
-                    break;
+            // 如果请求一个静态资源，调用StaticResourceHandler
+            if(StaticResourceHandler.isStaticTarget(target) && method.toLowerCase().equals("get")){
+                executor = new StaticResourceHandler();
+            }
+            else {
+                // 否则，在持有的executor中找到合适的，用这个executor处理请求
+                for (BasicExecutor e : SimpleServer.Executors) {
+                    if (target.endsWith(e.getUrl()) && method.toLowerCase().equals(e.getMethod().toLowerCase())) {
+                        executor = e;
+                        break;
+                    }
                 }
             }
 
-            HttpResponse response = null;
             // 找不到合适的executor
             // 404: 没有对应的url 405: 有对应的url但是没有对应的method
             if(executor == null) {
