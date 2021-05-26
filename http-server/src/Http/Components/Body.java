@@ -7,6 +7,7 @@ public class Body implements Component{
     byte[] data;
 
     public Body(){
+        this.data = new byte[0];
     }
 
     public Body(String data) {
@@ -16,9 +17,11 @@ public class Body implements Component{
     public Body(byte[] data){
         this.data = data;
     }
+
     public void setData(String s){
         this.data = s.getBytes(StandardCharsets.UTF_8);
     }
+
     public void append(String s){
         String tmp = new String(this.data);
         this.data = (tmp + s).getBytes();
