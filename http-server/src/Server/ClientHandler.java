@@ -7,6 +7,7 @@ import Http.HttpRequest;
 import Http.HttpResponse;
 import Http.Util;
 import RequestExecutor.BasicExecutor;
+import RequestExecutor.Common;
 import RequestExecutor.StaticResourceHandler;
 
 import java.io.*;
@@ -17,6 +18,7 @@ public class ClientHandler implements Runnable {
     BufferedReader inFromClient;
     DataOutputStream outToClient;
     Socket socket;
+    boolean ServerSwitch;
 
 
 
@@ -25,6 +27,7 @@ public class ClientHandler implements Runnable {
             socket = clientSock;
             inFromClient = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             outToClient = new DataOutputStream(socket.getOutputStream());
+            ServerSwitch = true;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -69,33 +72,40 @@ public class ClientHandler implements Runnable {
             HttpResponse response = null;
             BasicExecutor executor = null;
 
-            // 如果请求一个静态资源，调用StaticResourceHandler
-            if(StaticResourceHandler.isStaticTarget(target) && method.toLowerCase().equals("get")){
-                executor = new StaticResourceHandler();
-            }
-            else {
-                // 否则，在持有的executor中找到合适的，用这个executor处理请求
-                for (BasicExecutor e : SimpleServer.Executors) {
-                    if (target.endsWith(e.getUrl()) && method.toLowerCase().equals(e.getMethod().toLowerCase())) {
-                        executor = e;
-                        break;
-                    }
-                }
+            // 如果服务器内部错误，无法完成请求，则 500: 服务器内部错误
+            if(!ServerSwitch){
+                response = Common.generateStatusCode_500();
             }
 
-            // 找不到合适的executor
-            // 404: 没有对应的url 405: 有对应的url但是没有对应的method
-            if(executor == null) {
-                response = new HttpResponse(new StatusLine(1.1, 404, "Not Found"), new Headers(), new Body());
-                for(BasicExecutor e : SimpleServer.Executors) {
-                    if (target.endsWith(e.getUrl())){
-                        response = new HttpResponse(new StatusLine(1.1, 405, "Method Not Allowed"), new Headers(), new Body());
-                        break;
+            else{
+                // 如果请求一个静态资源，调用StaticResourceHandler
+                if(StaticResourceHandler.isStaticTarget(target) && method.toLowerCase().equals("get")){
+                    executor = new StaticResourceHandler();
+                }
+                else {
+                    // 否则，在持有的executor中找到合适的，用这个executor处理请求
+                    for (BasicExecutor e : SimpleServer.Executors) {
+                        if (target.endsWith(e.getUrl()) && method.toLowerCase().equals(e.getMethod().toLowerCase())) {
+                            executor = e;
+                            break;
+                        }
                     }
                 }
-            }
-            else {
-                response = executor.handle(request);
+
+                // 找不到合适的executor
+                // 404: 没有对应的url 405: 有对应的url但是没有对应的method
+                if(executor == null) {
+                    response = new HttpResponse(new StatusLine(1.1, 404, "Not Found"), new Headers(), new Body());
+                    for(BasicExecutor e : SimpleServer.Executors) {
+                        if (target.endsWith(e.getUrl())){
+                            response = new HttpResponse(new StatusLine(1.1, 405, "Method Not Allowed"), new Headers(), new Body());
+                            break;
+                        }
+                    }
+                }
+                else {
+                    response = executor.handle(request);
+                }
             }
 
             outToClient.write(response.ToBytes());
