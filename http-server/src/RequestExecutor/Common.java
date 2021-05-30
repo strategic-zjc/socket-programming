@@ -38,5 +38,20 @@ public class Common {
         return new HttpResponse(statusLine, headers, body);
     }
 
+    public static HttpResponse generateStatusCode_500(){
+        StatusLine statusLine = new StatusLine(1.1, StatusCode.INTERNAL_SERVER_ERROR.getCode(),"Internal Server Error");
+        Headers headers = new Headers();
+        String html_500 = "<html>\n" +
+                "<head><title>500 Internal Server Error</title></head>\n" +
+                "<body bgcolor=\"white\">\n" +
+                "<center><h1>500 Internal Server Error</h1><h6>simple http-server<h6></center>\n" +
+                "</body>\n" +
+                "</html>";
+        headers.addHeader("Content-Type", "text/html");
+        headers.addHeader("Content-Length", Long.toString(html_500.length()));
+        Body body = new Body(html_500);
+        return new HttpResponse(statusLine, headers, body);
+    }
+
 
 }
