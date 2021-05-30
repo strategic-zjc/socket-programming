@@ -17,31 +17,36 @@ import java.nio.ByteBuffer;
  * @author fguohao
  * @date 2021/05/28
  */
-public class ClientThread implements Runnable{
+public class ClientServer{
 
-    public DataOutputStream sendStream;
-    public BufferedReader recvStream;
-    public InputStream recvByteStream;
+    private OutputStream sendStream;
+    private InputStream recvStream;
     Socket clientSocket = null;
     String host;
     Integer port;
     Boolean keepAlive;
 
-    public ClientThread(String host, Integer port, Boolean keepAlive) {
+    public ClientServer(String host, Integer port, Boolean keepAlive) {
         this.host = host;
         this.port = port;
         this.keepAlive = keepAlive;
         System.out.println("new thread created");
     }
 
-    @Override
-    public void run() {
+    public OutputStream getSendStream() {
+        return sendStream;
+    }
+
+    public InputStream getRecvStream() {
+        return recvStream;
+    }
+
+    public void create() {
         try {
             clientSocket = new Socket(host, port);
             clientSocket.setKeepAlive(keepAlive);
-            sendStream = new DataOutputStream(clientSocket.getOutputStream());
-            recvByteStream = clientSocket.getInputStream();
-            recvStream = new BufferedReader(new InputStreamReader(recvByteStream));
+            sendStream = clientSocket.getOutputStream();
+            recvStream = clientSocket.getInputStream();
 
         } catch (IOException e) {
             e.printStackTrace();

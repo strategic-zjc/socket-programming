@@ -1,6 +1,6 @@
 package com.networkcourse.httpclient.message;
 
-import com.networkcourse.httpclient.client.ClientThread;
+
 import com.networkcourse.httpclient.message.component.commons.Header;
 import com.networkcourse.httpclient.message.component.commons.MessageBody;
 import com.networkcourse.httpclient.message.component.commons.MessageHeader;
@@ -25,49 +25,22 @@ public class HttpResponse {
     MessageHeader messageHeader;
     MessageBody messageBody;
 
-    public HttpResponse(ClientThread clientThread){
-        try {
-            /*while (true){
-                System.out.println(clientThread.recvStream.readLine());
-            }*/
+    public HttpResponse(ResponseLine responseLine, MessageHeader messageHeader, MessageBody messageBody) {
+        this.responseLine = responseLine;
+        this.messageHeader = messageHeader;
+        this.messageBody = messageBody;
+    }
 
-            //String respLine = clientThread.recvStream.readLine();
-            String respLine = InputStreamReaderHelper.readLine(clientThread.recvByteStream);
-            this.responseLine = new ResponseLine(respLine);
-            List<String> headers = new ArrayList<>();
-            String temp;
-//            while (!(temp=clientThread.recvStream.readLine()).equals("")){
-//                headers.add(temp);
-//            }
-            while (!(temp= InputStreamReaderHelper.readLine(clientThread.recvByteStream)).equals("")){
-                headers.add(temp);
-            }
-            this.messageHeader = new MessageHeader(headers);
-            byte[] b = null;
-            String transferEncoding = this.messageHeader.get(Header.Transfer_Encoding);
-            String contentLength = this.messageHeader.get(Header.Content_Length);
-            if(transferEncoding!=null&&transferEncoding.equals("chunked")){
-                //b = ChunkReader.readChunk(clientThread.recvStream);
-                b = ChunkReader.readChunk(clientThread.recvByteStream);
-                // Content-Encoding: gzip 解压缩
-                String contentEncoding = this.messageHeader.get(Header.Content_Encoding);
-                if(contentEncoding!=null&&contentEncoding.equals("gzip")){
-                    GZIPInputStream gzipInputStream = new GZIPInputStream(new ByteArrayInputStream(b));
-                    b = InputStreamReaderHelper.readInputStream(gzipInputStream);
-                }
-            }else if(contentLength!=null){
-                //clientThread.recvStream.reset();
-                int length = Integer.parseInt(contentLength);
-                b = ByteReader.readByte(clientThread.recvByteStream,length);
+    public ResponseLine getResponseLine() {
+        return responseLine;
+    }
 
-            }
-            //System.out.println(new String(b, StandardCharsets.UTF_8));
-            System.out.println();
+    public MessageHeader getMessageHeader() {
+        return messageHeader;
+    }
 
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public MessageBody getMessageBody() {
+        return messageBody;
     }
 
     @Override

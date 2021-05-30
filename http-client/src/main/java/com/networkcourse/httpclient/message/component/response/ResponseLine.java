@@ -1,5 +1,7 @@
 package com.networkcourse.httpclient.message.component.response;
 
+import com.networkcourse.httpclient.message.component.request.RequsetLine;
+
 import java.io.BufferedReader;
 
 /**
@@ -79,6 +81,11 @@ public class ResponseLine {
         sb.append(this.reasonPhrase);
         sb.append("\r\n"); //CRLF
         return sb.toString();
+    }
+
+    @Override
+    public ResponseLine clone(){
+        return new ResponseLine(HTTPVersion, (int)statusCode, reasonPhrase);
     }
 
 

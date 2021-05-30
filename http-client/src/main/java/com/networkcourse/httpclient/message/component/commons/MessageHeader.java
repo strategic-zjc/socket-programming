@@ -1,9 +1,10 @@
 package com.networkcourse.httpclient.message.component.commons;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Set;
+import com.networkcourse.httpclient.utils.InputStreamReaderHelper;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
 
 /**
  *
@@ -14,6 +15,28 @@ public class MessageHeader {
     private HashMap<String, String> header = new LinkedHashMap<>();
 
     public MessageHeader(){}
+
+    public MessageHeader(InputStream inputStream) throws IOException {
+        List<String> headers = new ArrayList<>();
+        String temp;
+        while (!(temp= InputStreamReaderHelper.readLine(inputStream)).equals("")){
+            headers.add(temp);
+        }
+        for(String header:headers){
+            String formattedHeader = header.trim();
+            if(formattedHeader.equals("")){
+                continue;
+            }
+            if(!formattedHeader.contains(":")){
+                //TODO
+                continue;
+            }
+            int index = formattedHeader.indexOf(":");
+            String fieldName = formattedHeader.substring(0,index).trim();
+            String fieldValue = formattedHeader.substring(index+1).trim();
+            this.header.put(fieldName,fieldValue);
+        }
+    }
 
     public MessageHeader(List<String> headers){
         for(String header:headers){
@@ -57,5 +80,12 @@ public class MessageHeader {
         return sb.toString();
     }
 
-
+    @Override
+    public MessageHeader clone(){
+        MessageHeader messageHeader = new MessageHeader();
+        for(String header: this.header.keySet()){
+            messageHeader.put(header, this.header.get(header));
+        }
+        return messageHeader;
+    }
 }

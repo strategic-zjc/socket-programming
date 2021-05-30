@@ -1,5 +1,11 @@
 package com.networkcourse.httpclient.message.component.request;
 
+import com.networkcourse.httpclient.message.component.response.ResponseLine;
+import com.networkcourse.httpclient.utils.InputStreamReaderHelper;
+
+import java.io.IOException;
+import java.io.InputStream;
+
 /**
  * Request-Line
  * Please refer to https://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html#sec5.1
@@ -25,6 +31,28 @@ public class RequsetLine {
         this.method = method;
         this.requestURI = requestURI;
         this.httpVersion = httpVersion;
+    }
+
+
+
+    public RequsetLine(InputStream inputStream) throws IOException {
+        String line = InputStreamReaderHelper.readLine(inputStream);
+        if(!line.contains(" ")){
+            //TODO
+            //throw new Exception("some error occured when reading ResponseLine");
+        }else{
+            int index = line.indexOf(" ");
+            this.method = line.substring(0,index);
+            line = line.substring(index+1);
+        }
+        if(!line.contains(" ")){
+            //TODO
+            //throw new Exception("some error occured when reading ResponseLine");
+        }else{
+            int index = line.indexOf(" ");
+            this.requestURI = line.substring(0,index);
+            this.httpVersion = line.substring(index+1);
+        }
     }
 
     public String getMethod() {
@@ -61,5 +89,10 @@ public class RequsetLine {
         sb.append(this.httpVersion);
         sb.append("\r\n"); //CRLF
         return sb.toString();
+    }
+
+    @Override
+    public RequsetLine clone(){
+        return new RequsetLine(method, requestURI, httpVersion);
     }
 }

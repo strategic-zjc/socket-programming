@@ -2,43 +2,75 @@ package com.networkcourse.httpclient.client;
 
 import com.networkcourse.httpclient.exception.MissingHostException;
 import com.networkcourse.httpclient.exception.UnsupportedHostException;
+import com.networkcourse.httpclient.handler.RequestHandler;
 import com.networkcourse.httpclient.message.HttpRequest;
 import com.networkcourse.httpclient.message.HttpResponse;
 import com.networkcourse.httpclient.message.component.commons.Header;
 import com.networkcourse.httpclient.message.component.commons.Host;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 /**
+ * only support absoulte uri and path
  * @author fguohao
  * @date 2021/05/28
  */
 public class ClientPool {
-    HashMap<String, ClientThread> clientThreadHashMap = new LinkedHashMap<>();
 
-    public HttpResponse sendHttpRequest(HttpRequest httpRequest) throws MissingHostException, UnsupportedHostException, IOException {
-        ClientThread clientThread = createClientThread(httpRequest);
-        System.out.println(httpRequest.toString());
-        clientThread.sendStream.writeBytes(httpRequest.toString());
-        HttpResponse httpResponse = new HttpResponse(clientThread);
-        System.out.println(httpResponse.toString());
-        clientThread.closeConnection();
-        return null;
+    private static ClientPool INSTANCE;
+
+    private ClientPool(){
+
     }
 
-    private ClientThread createClientThread(HttpRequest httpRequest) throws MissingHostException, UnsupportedHostException {
-        String hostString = httpRequest.getMessageHeader().get(Header.Host);
+    public static ClientPool getINSTANCE(){
+        if(INSTANCE==null){
+            INSTANCE=new ClientPool();
+        }
+        return INSTANCE;
+    }
+
+    HashMap<String, ClientServer> clientServerHashMap = new LinkedHashMap<>();
+
+
+    public ClientServer sendHttpRequest(HttpRequest httpRequest) throws MissingHostException, UnsupportedHostException, IOException, URISyntaxException {
+        ClientServer clientServer = createClientServer(httpRequest);
+        clientServer.getSendStream().write(httpRequest.toBytes());
+
+        return clientServer;
+    }
+
+    public ClientServer createClientServer(HttpRequest httpRequest) throws MissingHostException, UnsupportedHostException, URISyntaxException {
+        String hostString = null;
+        if(!httpRequest.getRequsetLine().getRequestURI().startsWith("/")){
+            URI uri = new URI(httpRequest.getRequsetLine().getRequestURI());
+            hostString = uri.getHost();
+            int port = uri.getPort();
+            if(hostString.isEmpty()){
+                //todo some error occurred
+                throw new MissingHostException();
+            }
+            if(port!=80){
+                //todo some error occurred
+            }
+        }else{
+            hostString = httpRequest.getMessageHeader().get(Header.Host);
+        }
+
         if(hostString==null){
             throw new MissingHostException();
         }
-        ClientThread clientThread = clientThreadHashMap.get(hostString);
-        if(clientThread!=null){
-            if(clientThread.isClosed()){
-                clientThreadHashMap.remove(hostString);
+        ClientServer clientServer = clientServerHashMap.get(hostString);
+        if(clientServer!=null){
+            if(clientServer.isClosed()){
+                clientServerHashMap.remove(hostString);
             }else{
-                return clientThread;
+                return clientServer;
             }
         }
         Host host = new Host(hostString);
@@ -47,11 +79,11 @@ public class ClientPool {
             port = host.getPort();
         }
         Boolean keepAlive = httpRequest.isKeepAlive();
-        clientThread = new ClientThread(host.getHost(), port, keepAlive);
+        clientServer = new ClientServer(host.getHost(), port, keepAlive);
         if(keepAlive){
-            clientThreadHashMap.put(hostString,clientThread);
+            clientServerHashMap.put(hostString,clientServer);
         }
-        clientThread.run();
-        return clientThread;
+        clientServer.create();
+        return clientServer;
     }
 }

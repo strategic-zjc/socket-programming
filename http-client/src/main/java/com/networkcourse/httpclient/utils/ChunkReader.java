@@ -37,18 +37,18 @@ public class ChunkReader {
             int count=0;
             while (count!=length){
                 count+=inputStream.read(tempBuffer,count,length-count);
-                System.out.println("not enough:"+count+" real:"+length);
             }
 
             buffer.add(tempBuffer);
             inputStream.read();//CR
             inputStream.read();//LF
             temp = InputStreamReaderHelper.readLine(inputStream);
-            System.out.println("real-loaded:"+tempBuffer.length+"length:"+length);
-            System.out.println(temp);
+
             length = Integer.parseInt(temp,16);
 
         }
+        inputStream.read();//CR
+        inputStream.read();//LF
         return ByteUtil.mergeBytes(buffer);
     }
 
