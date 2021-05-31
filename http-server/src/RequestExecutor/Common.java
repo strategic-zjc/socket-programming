@@ -5,14 +5,13 @@ import Http.Components.Headers;
 import Http.Components.StatusLine;
 import Http.HttpResponse;
 import StatusCode.StatusCode;
-
 public class Common {
 
     public static HttpResponse LoginSuccess(String hint){
         StatusLine statusLine = new StatusLine(1.1, StatusCode.OK.getCode(),"OK");
         Headers headers = new Headers();
         String html_200 = "<html>\n" +
-                "<head><title>Login succeed</title></head>\n" +
+                "<head><title>200 OK</title></head>\n" +
                 "<body bgcolor=\"white\">\n" +
                 "<center><h1>" + hint +"</h1><h6>simple http-server<h6></center>\n" +
                 "</body>\n" +
@@ -50,6 +49,20 @@ public class Common {
         headers.addHeader("Content-Type", "text/html");
         headers.addHeader("Content-Length", Long.toString(html_500.length()));
         Body body = new Body(html_500);
+        return new HttpResponse(statusLine, headers, body);
+    }
+    public static HttpResponse generateStatusCode_301(String hint){
+        StatusLine statusLine = new StatusLine(1.1, StatusCode.MOVED_PERMANENTLY.getCode(),"Moved Permanently");
+        Headers headers = new Headers();
+        String html_301 = "<html>\n" +
+                "<head><title>301 Moved Permanently</title></head>\n" +
+                "<body bgcolor=\"white\">\n" +
+                "<center><h1>301 Moved Permanently</h1><h6>simple http-server<h6></center>\n" +
+                "</body>\n" +
+                "</html>";
+        headers.addHeader("Content-Type", "text/html");
+        headers.addHeader("Content-Length", Long.toString(html_301.length()));
+        Body body = new Body(html_301);
         return new HttpResponse(statusLine, headers, body);
     }
 
