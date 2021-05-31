@@ -23,6 +23,7 @@ public class PostTest {
 
     Client client = new Client();
     History history = History.getINSTANCE();
+    String usernameandpa="username=admin&password=123456";
     @Test
     public void testPost(){
         try {
@@ -46,31 +47,29 @@ public class PostTest {
         RequsetLine requsetLine = new RequsetLine(Method.POST,path);
         MessageHeader messageHeader = new MessageHeader();
         messageHeader.put(Header.Host,"localhost:5000");
-        MessageBody messageBody = new MessageBody();
+        MessageBody messageBody = new MessageBody(usernameandpa.getBytes());
         HttpRequest httpRequest = new HttpRequest(requsetLine,messageHeader, messageBody);
+        httpRequest.getMessageHeader().put(Header.Content_Type,"application/x-www-form-urlencoded");
+        httpRequest.getMessageHeader().put(Header.Content_Length,String.valueOf(usernameandpa.length()));
+
         return httpRequest;
     }
 
 
     public void postTest1() throws MissingHostException, UnsupportedHostException, ParseException, URISyntaxException {
         HttpRequest httpRequest  =normal("/login");
-        httpRequest.getMessageHeader().put(Header.Content_Type,"application/x-www-form-urlencoded");
-        httpRequest.getMessageBody().setBody("username=admin&password=123456".getBytes());
+        System.out.println(new String(httpRequest.toBytes()));
         client.sendHttpRequest(httpRequest);
     }
 
 
     public void postTest2() throws MissingHostException, UnsupportedHostException, ParseException, URISyntaxException {
         HttpRequest httpRequest  =normal("/register");
-        httpRequest.getMessageHeader().put(Header.Content_Type,"application/x-www-form-urlencoded");
-        httpRequest.getMessageBody().setBody("username=admin&password=123456".getBytes(StandardCharsets.UTF_8));
         client.sendHttpRequest(httpRequest);
     }
 
     public void postTest3() throws MissingHostException, UnsupportedHostException, ParseException, URISyntaxException {
         HttpRequest httpRequest  =normal("/login");
-        httpRequest.getMessageHeader().put(Header.Content_Type,"application/x-www-form-urlencoded");
-        httpRequest.getMessageBody().setBody("username=admin&password=123456".getBytes());
         client.sendHttpRequest(httpRequest);
     }
 }
