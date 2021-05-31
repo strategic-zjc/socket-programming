@@ -25,7 +25,11 @@ public class ByteReader {
     }
     public static byte[] readByte(InputStream inputStreamReader, int length) throws IOException {
         byte[] b = new byte[length];
-        inputStreamReader.read(b,0,length);
+
+        int count=0;
+        while (count!=length){
+            count+=inputStreamReader.read(b,count,length-count);
+        }
         return b;
     }
 }
