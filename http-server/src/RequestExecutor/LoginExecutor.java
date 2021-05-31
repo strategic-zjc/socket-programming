@@ -48,10 +48,10 @@ public class LoginExecutor extends BasicExecutor{
 
             if (db.containsKey(username) && db.get(username).equals(password)) {
                 String hint = "You have successfully login in!";
-                response = Common.LoginSuccess(hint);
+                response = Common.generateStatusCode_200(hint);
             } else {
                 String hint = "login failed";
-                response = new HttpResponse(new StatusLine(1.1, 200, "OK"), new Headers(), new Body(hint));
+                response = Common.generateStatusCode_200(hint);
             }
         }
 

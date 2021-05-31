@@ -12,6 +12,8 @@ import RequestExecutor.StaticResourceHandler;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class ClientHandler implements Runnable {
     // new thread
@@ -19,7 +21,9 @@ public class ClientHandler implements Runnable {
     DataOutputStream outToClient;
     Socket socket;
     boolean ServerSwitch;
-
+    boolean isTimeout = false;
+    int startTime = 0;
+    int endTime = 0;
 
 
     public ClientHandler(Socket clientSock) {
@@ -40,78 +44,91 @@ public class ClientHandler implements Runnable {
     @Override
     public void run() {
         try {
-            // read all bytes from socket stream
-            String line;
-            StringBuilder sb = new StringBuilder();
-            while((line = inFromClient.readLine()) != null){
-                sb.append(line).append('\n');
-                if(line.isEmpty())
-                    break;
-            }
-
-            if(sb.toString().equals("")) return;
-
-            HttpRequest request = Util.String2Request(sb.toString());
-
-            String contentLength = request.getHeaders().getValue("Content-Length");
-
-            if(contentLength != null) {
-
-                int length = Integer.parseInt(contentLength);
-
-                char[] cbuf = new char[length];
-                inFromClient.read(cbuf, 0, length);
-
-                request.getBody().setData(String.valueOf(cbuf));
-            }
-
-
-            String target = request.getStartLine().getTarget();
-            String method = request.getStartLine().getMethod();
-
-            HttpResponse response = null;
-            BasicExecutor executor = null;
-
-            // 如果服务器内部错误，无法完成请求，则 500: 服务器内部错误
-            if(!ServerSwitch){
-                response = Common.generateStatusCode_500();
-            }
-
-            else{
-                // 如果请求一个静态资源，调用StaticResourceHandler
-                if(StaticResourceHandler.isStaticTarget(target) && method.toLowerCase().equals("get")){
-                    executor = new StaticResourceHandler();
+           while (true) {
+                // read all bytes from socket stream
+                String line;
+                StringBuilder sb = new StringBuilder();
+                while ((line = inFromClient.readLine()) != null) {
+                    sb.append(line).append('\n');
+                    if (line.isEmpty())
+                        break;
                 }
-                else {
-                    // 否则，在持有的executor中找到合适的，用这个executor处理请求
-                    for (BasicExecutor e : SimpleServer.Executors) {
-                        if (target.endsWith(e.getUrl()) && method.toLowerCase().equals(e.getMethod().toLowerCase())) {
-                            executor = e;
-                            break;
+
+               if (startTime == endTime && startTime != 0) {
+                   break;
+               }
+
+                if (sb.toString().equals("")) return;
+
+                HttpRequest request = Util.String2Request(sb.toString());
+                if (!request.getHeaders().getValue("Connection").isEmpty()) {
+                    String timeout = request.getHeaders().getValue("Keep-Alive");
+                    Timer timer = SimpleServer.timer;
+                    startTime++;
+                    timer.schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            endTime++;
                         }
+                    }, Integer.parseInt(timeout.substring(8)) * 1000L);
+                }
+
+                String contentLength = request.getHeaders().getValue("Content-Length");
+
+                if (contentLength != null) {
+
+                    int length = Integer.parseInt(contentLength);
+
+                    char[] cbuf = new char[length];
+                    inFromClient.read(cbuf, 0, length);
+
+                    request.getBody().setData(String.valueOf(cbuf));
+                }
+
+
+                String target = request.getStartLine().getTarget();
+                String method = request.getStartLine().getMethod();
+
+                HttpResponse response = null;
+                BasicExecutor executor = null;
+
+                // 如果服务器内部错误，无法完成请求，则 500: 服务器内部错误
+                if (!ServerSwitch) {
+                    response = Common.generateStatusCode_500();
+                } else {
+                    // 如果请求一个静态资源，调用StaticResourceHandler
+                    if (StaticResourceHandler.isStaticTarget(target) && method.toLowerCase().equals("get")) {
+                        executor = new StaticResourceHandler();
+                    } else {
+                        // 否则，在持有的executor中找到合适的，用这个executor处理请求
+                        for (BasicExecutor e : SimpleServer.Executors) {
+                            if (target.endsWith(e.getUrl()) && method.toLowerCase().equals(e.getMethod().toLowerCase())) {
+                                executor = e;
+                                break;
+                            }
+                        }
+                    }
+
+                    // 找不到合适的executor
+                    // 404: 没有对应的url 405: 有对应的url但是没有对应的method
+                    if (executor == null) {
+                        response = new HttpResponse(new StatusLine(1.1, 404, "Not Found"), new Headers(), new Body());
+                        for (BasicExecutor e : SimpleServer.Executors) {
+                            if (target.endsWith(e.getUrl())) {
+                                response = new HttpResponse(new StatusLine(1.1, 405, "Method Not Allowed"), new Headers(), new Body());
+                                break;
+                            }
+                        }
+                    } else {
+                        response = executor.handle(request);
                     }
                 }
 
-                // 找不到合适的executor
-                // 404: 没有对应的url 405: 有对应的url但是没有对应的method
-                if(executor == null) {
-                    response = new HttpResponse(new StatusLine(1.1, 404, "Not Found"), new Headers(), new Body());
-                    for(BasicExecutor e : SimpleServer.Executors) {
-                        if (target.endsWith(e.getUrl())){
-                            response = new HttpResponse(new StatusLine(1.1, 405, "Method Not Allowed"), new Headers(), new Body());
-                            break;
-                        }
-                    }
-                }
-                else {
-                    response = executor.handle(request);
-                }
-            }
+                outToClient.write(response.ToBytes());
+                //timer 如果再次收到请求，重置timer，否则就关闭
 
-            outToClient.write(response.ToBytes());
-            //timer 如果再次收到请求，重置timer，否则就关闭
-            //
-            outToClient.close();
+            }
+//            outToClient.close();
         } catch (Exception e) {
             e.printStackTrace();
         }

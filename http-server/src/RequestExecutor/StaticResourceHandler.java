@@ -16,6 +16,7 @@ public class StaticResourceHandler extends BasicExecutor {
     public static HashMap<String, String> MovedPermanentlyResource = new HashMap<>();
     public static HashMap<String, String> MovedTemporarilyResource = new HashMap<>();
     // todo:304状态码
+
     public static HashMap<String, String> ModifiedTime = new HashMap<>();
 
     public StaticResourceHandler() {
@@ -62,12 +63,15 @@ public class StaticResourceHandler extends BasicExecutor {
         byte[] bytesArray = new byte[(int) f.length()];
         try {
             FileInputStream fis = new FileInputStream(f);
-            fis.read(bytesArray); //read file into bytes[]
+            fis.read(bytesArray);
+            //read file into bytes[]
             fis.close();
         } catch (Exception e) {
             e.printStackTrace();
             return new HttpResponse(new StatusLine(1.1, 404, "Not Found"), new Headers(), new Body());
         }
+
+
         body.setData(bytesArray);
 
         return new HttpResponse(statusLine, headers, body);

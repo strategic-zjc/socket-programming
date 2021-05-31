@@ -33,15 +33,16 @@ public class Body implements Component{
 
     @Override
     public String ToString() {
-        return new String(data) + '\n';
+        return new String(data);
     }
 
     @Override
     public byte[] ToBytes() {
-        byte[] ret = new byte[data.length + 1];
-        System.arraycopy(data, 0, ret, 0, data.length);
-        ret[data.length] = '\n';
-        return ret;
+//        byte[] ret = new byte[data.length + 1];
+//        System.arraycopy(data, 0, ret, 0, data.length);
+//        ret[data.length] = '\n';
+//        return ret;
+        return data;
     }
 
 }
