@@ -54,9 +54,9 @@ public class ResponseHandler {
         MessageBody messageBody;
         HttpResponse httpResponse = null;
 
-        responseLine = readResponseLine(inputStream);
-        messageHeader = readMessageHeader(inputStream);
-        messageBody = readMessageBody(messageHeader, inputStream);
+        responseLine = new ResponseLine(InputStreamReaderHelper.readLine(inputStream));
+        messageHeader = new MessageHeader(inputStream);
+        messageBody = new MessageBody( inputStream , messageHeader);
         httpResponse =  new HttpResponse(responseLine,messageHeader,messageBody);
         History.getINSTANCE().addHistory(httpRequest, httpResponse);//log
         switch (responseLine.getStatusCode()){

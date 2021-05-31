@@ -29,38 +29,38 @@ public class Main {
     public static void main(String[] args) throws ParseException {
 //*****************************************************
 //  ****   1 you can construct your request here *****
-//        RequsetLine requsetLine = new RequsetLine(Method.GET,"/");
-//        MessageHeader messageHeader = new MessageHeader();
-//        messageHeader.put(Header.Host,"www.baidu.com");
-//        messageHeader.put(Header.Accept,"*/*");
-//        messageHeader.put(Header.Connection,"keep-alive");
-//        messageHeader.put(Header.Accept_Encoding,"gzip, deflate, br");
-//        MessageBody messageBody= new MessageBody();
-//        HttpRequest httpRequest = new HttpRequest(requsetLine,messageHeader,messageBody);
-//        Client client = new Client();
-//        try {
-//            HttpResponse httpResponse =client.sendHttpRequest(httpRequest);
-//            //System.out.println(httpResponse);
-//            //clientPool.sendHttpRequest(httpRequest);
-//        } catch (MissingHostException e) {
-//            e.printStackTrace();
-//        } catch (UnsupportedHostException e) {
-//            e.printStackTrace();
-//        } catch (URISyntaxException e) {
-//            e.printStackTrace();
-//        }
-//       History.getINSTANCE().printHistory();
+        RequsetLine requsetLine = new RequsetLine(Method.GET,"/");
+        MessageHeader messageHeader = new MessageHeader();
+        messageHeader.put(Header.Host,"www.baidu.com");
+        messageHeader.put(Header.Accept,"*/*");
+        messageHeader.put(Header.Connection,"keep-alive");
+        //messageHeader.put(Header.Accept_Encoding,"gzip, deflate, br");
+        MessageBody messageBody= new MessageBody();
+        HttpRequest httpRequest = new HttpRequest(requsetLine,messageHeader,messageBody);
+        Client client = new Client();
+        try {
+            HttpResponse httpResponse =client.sendHttpRequest(httpRequest);
+            //System.out.println(httpResponse);
+            //clientPool.sendHttpRequest(httpRequest);
+        } catch (MissingHostException e) {
+            e.printStackTrace();
+        } catch (UnsupportedHostException e) {
+            e.printStackTrace();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+       History.getINSTANCE().printHistory();
 // *********************************************
 
         //**** 2 input from stdin and get result from stdout
-        Client client = new Client();
-        try {
+        //Client client = new Client();
+        /*try {
             client.stdMode();
             //System.out.println(httpResponse);
             //clientPool.sendHttpRequest(httpRequest);
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        }*/
 
 
     }
