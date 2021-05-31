@@ -5,7 +5,6 @@ import Http.Components.Headers;
 import Http.Components.StatusLine;
 import Http.HttpResponse;
 import StatusCode.StatusCode;
-
 public class Common {
 
     public static HttpResponse generateStatusCode_200(String hint){
@@ -54,15 +53,9 @@ public class Common {
     }
     public static  HttpResponse generateStatusCode_301(String url){
         StatusLine statusLine = new StatusLine(1.1, StatusCode.MOVED_PERMANENTLY.getCode(),"301 Moved Permanently");
-        Headers headers = new Headers();
-        String html_301 = "<html>\n" +
-                "<head><title>301 Moved Permanently</title></head>\n" +
-                "<body bgcolor=\"white\">\n" +
-                "<center><h1>301 Moved Permanently</h1><h6>simple http-server<h6></center>\n" +
-                "</body>\n" +
-                "</html>";
-        headers.addHeader("Content-Type", "text/html");
-        headers.addHeader("Content-Length", Long.toString(html_301.length()));
+        Body body = new Body(html_301);
+        return new HttpResponse(statusLine, headers, body);
+    }
         headers.addHeader("Location", url);
         Body body = new Body(html_301);
         return new HttpResponse(statusLine, headers, body);

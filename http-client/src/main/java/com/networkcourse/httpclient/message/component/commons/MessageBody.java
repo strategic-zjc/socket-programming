@@ -9,6 +9,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
@@ -39,6 +40,7 @@ public class MessageBody {
             int length = Integer.parseInt(contentLength);
             b = ByteReader.readByte(inputStream,length);
         }
+        this.body = b;
     }
 
     public MessageBody(byte[] body) {
@@ -52,6 +54,25 @@ public class MessageBody {
     public void setBody(byte[] body) {
         this.body = body;
     }
+
+    public String toStringByType(String contentType) {
+        if(this.body.length==0){
+            return "\r\n";
+        }
+        if(contentType!=null){
+            String[] s = contentType.split(";");
+            if(s.length>=1){
+                if(s[0].equals("text/html")||s[0].equals("application/x-www-form-urlencoded")){
+                    return new String(this.body);
+                }
+            }else{
+                return "byte body not supported\r\n";
+            }
+        }
+       return "byte body not supported\r\n";
+    }
+
+
 
     @Override
     public MessageBody clone(){
