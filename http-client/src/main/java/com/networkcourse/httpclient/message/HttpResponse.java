@@ -50,6 +50,8 @@ public class HttpResponse {
         sb.append(messageHeader.toString());
         sb.append("\r\n");
         //TODO messageBodyToSring
+        sb.append(messageBody.toStringByType(messageHeader.get(Header.Content_Type)));
+
         return sb.toString();
     }
 }

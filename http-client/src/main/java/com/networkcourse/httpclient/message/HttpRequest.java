@@ -47,7 +47,8 @@ public class HttpRequest {
         sb.append(requsetLine.toString());
         sb.append(messageHeader.toString());
         sb.append("\r\n");
-        //TODO: body to string
+        sb.append(messageBody.toStringByType(messageHeader.get(Header.Content_Type)));
+
         return sb.toString();
     }
 
