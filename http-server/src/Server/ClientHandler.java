@@ -22,8 +22,7 @@ public class ClientHandler implements Runnable {
     Socket socket;
     boolean ServerSwitch;
     boolean isTimeout = false;
-    int startTime = 0;
-    int endTime = 0;
+    public static TimerTask timerTask = null;
 
 
     public ClientHandler(Socket clientSock) {
@@ -44,7 +43,7 @@ public class ClientHandler implements Runnable {
     @Override
     public void run() {
         try {
-           while (true) {
+            while (true) {
                 // read all bytes from socket stream
                 String line;
                 StringBuilder sb = new StringBuilder();
@@ -54,24 +53,27 @@ public class ClientHandler implements Runnable {
                         break;
                 }
 
-               if (startTime == endTime && startTime != 0) {
-                   break;
-               }
+                if (isTimeout) {
+                    break;
+                }
 
                 if (sb.toString().equals("")) return;
 
                 HttpRequest request = Util.String2Request(sb.toString());
-                if (!request.getHeaders().getValue("Connection").isEmpty()) {
+                if (request.getHeaders().getValue("Keep-Alive") != null) {
                     String timeout = request.getHeaders().getValue("Keep-Alive");
-                    Timer timer = SimpleServer.timer;
-                    startTime++;
-                    timer.schedule(new TimerTask() {
+                    if (timerTask != null) {
+                        timerTask.cancel();
+                    }
+                    timerTask = new TimerTask() {
                         @Override
                         public void run() {
-                            endTime++;
+                            isTimeout = true;
                         }
-                    }, Integer.parseInt(timeout.substring(8)) * 1000L);
+                    };
+                    SimpleServer.timer.schedule(timerTask, Integer.parseInt(timeout.substring(8)) * 1000L);
                 }
+
 
                 String contentLength = request.getHeaders().getValue("Content-Length");
 
