@@ -43,7 +43,12 @@ public class ClientHandler implements Runnable {
     @Override
     public void run() {
         try {
+
             while (true) {
+                if (isTimeout) {
+                    socket.close();
+                    return;
+                }
                 // read all bytes from socket stream
                 String line;
                 StringBuilder sb = new StringBuilder();
@@ -53,9 +58,6 @@ public class ClientHandler implements Runnable {
                         break;
                 }
 
-                if (isTimeout) {
-                    break;
-                }
 
                 if (sb.toString().equals("")) return;
 

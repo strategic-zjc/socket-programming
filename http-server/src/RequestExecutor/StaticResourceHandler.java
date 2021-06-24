@@ -5,6 +5,7 @@ import Http.Components.Headers;
 import Http.Components.StatusLine;
 import Http.HttpRequest;
 import Http.HttpResponse;
+import StatusCode.StatusCode;
 import jdk.internal.util.xml.impl.Pair;
 
 import java.io.File;
@@ -38,12 +39,14 @@ public class StaticResourceHandler extends BasicExecutor {
         String target = request.getStartLine().getTarget();
 
         if (MovedPermanentlyResource.containsKey(target)) {
-            statusLine = new StatusLine(1.1, 301, "Moved Permanently");
+            statusLine = new StatusLine(1.1, StatusCode.MOVED_PERMANENTLY.getCode(), "Moved Permanently");
             target = MovedPermanentlyResource.get(target);
         }
         else if (MovedTemporarilyResource.containsKey(target)) {
-            String hint = "The resource is temporarily moved to http://localhost:5000" + MovedTemporarilyResource.get(target);
-            return new HttpResponse(new StatusLine(1.1, 302, "Found"), new Headers(), new Body(hint));
+            /*String hint = "The resource is temporarily moved to http://localhost:5000" + MovedTemporarilyResource.get(target);
+            return new HttpResponse(new StatusLine(1.1, 302, "Found"), new Headers(), new Body(hint));*/
+            statusLine = new StatusLine(1.1, StatusCode.FOUND.getCode(), "Found");
+            target = MovedTemporarilyResource.get(target);
         }
         else {
             statusLine = new StatusLine(1.1, 200, "OK");
