@@ -9,6 +9,7 @@ import RequestExecutor.StaticResourceHandler;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.TimerTask;
 
 public class ClientHandler implements Runnable {
@@ -128,6 +129,8 @@ public class ClientHandler implements Runnable {
 
             }
 //            outToClient.close();
+        }catch (SocketException e){
+
         } catch (Exception e) {
             HttpResponse response = Template.generateStatusCode_500();
             try {

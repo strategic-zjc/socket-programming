@@ -41,13 +41,13 @@ public class StaticResourceHandler extends BasicExecutor {
         Body body = new Body();
         String target = request.getStartLine().getTarget();
 
+        String host = headers.getValue("Host");
+
         if (MovedPermanentlyResource.containsKey(target)) {
-            statusLine = new StatusLine(1.1, StatusCode.MOVED_PERMANENTLY.getCode(), "Moved Permanently");
-            target = MovedPermanentlyResource.get(target);
+            return Template.generateStatusCode_301(MovedPermanentlyResource.get(target));
         }
         else if (MovedTemporarilyResource.containsKey(target)) {
-            statusLine = new StatusLine(1.1, StatusCode.FOUND.getCode(), "Found");
-            target = MovedTemporarilyResource.get(target);
+            return Template.generateStatusCode_302(MovedTemporarilyResource.get(target));
         }
         else {
             statusLine = new StatusLine(1.1, 200, "OK");
