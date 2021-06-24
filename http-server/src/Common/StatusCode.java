@@ -1,4 +1,4 @@
-package StatusCode;
+package Common;
 public enum StatusCode {
     OK(200),
     MOVED_PERMANENTLY(301),FOUND(302),NOT_MODIFIED(304),

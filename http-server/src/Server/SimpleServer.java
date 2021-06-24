@@ -1,9 +1,6 @@
 package Server;
 
-import RequestExecutor.BasicExecutor;
-import RequestExecutor.LoginExecutor;
-import RequestExecutor.RegisterExecutor;
-import RequestExecutor.StaticResourceHandler;
+import RequestExecutor.*;
 
 import java.util.Timer;
 import java.io.PrintWriter;
@@ -24,6 +21,7 @@ public class SimpleServer {
 
         Executors.add(new LoginExecutor());
         Executors.add(new RegisterExecutor());
+        Executors.add(new ErrorExecutor());
        // Executors.add(new StaticResourceHandler());
         try {
             ServerSocket serverSocket = new ServerSocket(5000);// 先创建一个

@@ -30,5 +30,5 @@ public  abstract class BasicExecutor {
         this.method = method;
     }
 
-    public abstract HttpResponse handle (HttpRequest request);
+    public abstract HttpResponse handle (HttpRequest request) throws Exception;
 }

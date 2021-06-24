@@ -1,15 +1,20 @@
 package RequestExecutor;
 
+import Common.Template;
 import Http.Components.Body;
 import Http.Components.Headers;
 import Http.Components.StatusLine;
 import Http.HttpRequest;
 import Http.HttpResponse;
-import StatusCode.StatusCode;
+import Common.StatusCode;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
+import java.util.TimeZone;
 
 public class StaticResourceHandler extends BasicExecutor {
 
@@ -30,7 +35,7 @@ public class StaticResourceHandler extends BasicExecutor {
         return target.contains(".");
     }
 
-    public HttpResponse handle(HttpRequest request) {
+    public HttpResponse handle(HttpRequest request) throws Exception{
         StatusLine statusLine = null;
         Headers headers = new Headers();
         Body body = new Body();
@@ -52,12 +57,30 @@ public class StaticResourceHandler extends BasicExecutor {
             headers.addHeader("Content-Type", "text/html");
         } else if (target.endsWith(".png")) {
             headers.addHeader("Content-Type", "image/png");
+        }else if(target.endsWith(".js")){
+            headers.addHeader("Content-Type", " text/javascript");
         }
-        // todo: 添加其他格式
 
         String path = target.substring(target.lastIndexOf("/") + 1);
+
+        // add length
         File f = new File(path);
         headers.addHeader("Content-Length", Long.toString(f.length()));
+
+        // add last modified
+        Date fileLastModifiedTime = new Date(f.lastModified());
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy hh:mm:ss z", Locale.ENGLISH);
+        sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+        System.out.println(sdf.format(fileLastModifiedTime));
+        headers.addHeader("Last-Modified", sdf.format(fileLastModifiedTime));
+
+        String time = request.getHeaders().getValue("If-Modified-Since");
+        if (time != null){
+            Date Limit =  sdf.parse(time);
+            if(Limit.compareTo(fileLastModifiedTime) > 0){
+                return Template.generateStatusCode_304();
+            }
+        }
 
         byte[] bytesArray = new byte[(int) f.length()];
         try {

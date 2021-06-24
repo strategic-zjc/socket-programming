@@ -1,11 +1,14 @@
-package RequestExecutor;
+package Common;
 
 import Http.Components.Body;
 import Http.Components.Headers;
 import Http.Components.StatusLine;
 import Http.HttpResponse;
-import StatusCode.StatusCode;
-public class Common {
+import Common.StatusCode;
+/*
+    一些response模板
+ */
+public class Template {
 
     public static HttpResponse generateStatusCode_200(String hint){
         StatusLine statusLine = new StatusLine(1.1, StatusCode.OK.getCode(),"200 OK");
@@ -65,6 +68,28 @@ public class Common {
         Body body = new Body(html_500);
         return new HttpResponse(statusLine, headers, body);
     }
+    public static HttpResponse generateStatusCode_400(){
+        StatusLine statusLine = new StatusLine(1.1, StatusCode.INTERNAL_SERVER_ERROR.getCode(),"400 Bad Request");
+        Headers headers = new Headers();
+        String html_400 = "<html>\n" +
+                "<head><title>400 Bad Request</title></head>\n" +
+                "<body bgcolor=\"white\">\n" +
+                "<center><h1>400 Bad Request</h1><h6>simple http-server<h6></center>\n" +
+                "</body>\n" +
+                "</html>";
+        headers.addHeader("Content-Type", "text/html");
+        headers.addHeader("Content-Length", Long.toString(html_400.length()));
+        Body body = new Body(html_400);
+        return new HttpResponse(statusLine, headers, body);
+    }
+
+    public static HttpResponse generateStatusCode_304(){
+        StatusLine statusLine = new StatusLine(1.1, StatusCode.NOT_MODIFIED.getCode(),"304 Not Modified");
+        Headers headers = new Headers();
+        Body body = new Body();
+        return new HttpResponse(statusLine, headers, body);
+    }
+
     public static HttpResponse generateStatusCode_301(String url){
         StatusLine statusLine = new StatusLine(1.1, StatusCode.MOVED_PERMANENTLY.getCode(), "301 Moved Permanrntly");
         Headers headers = new Headers();

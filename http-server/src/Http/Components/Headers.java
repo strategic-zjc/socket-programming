@@ -36,7 +36,7 @@ public class Headers implements Component{
     }
 
     public void addHeader(String s){
-        String[] tmp = s.split(":");
+        String[] tmp = s.split(":", 2);
         this.addHeader(tmp[0].trim(), tmp[1].trim());
     }
 }

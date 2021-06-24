@@ -1,18 +1,14 @@
 package Server;
 
-import Http.Components.Body;
-import Http.Components.Headers;
-import Http.Components.StatusLine;
 import Http.HttpRequest;
 import Http.HttpResponse;
 import Http.Util;
 import RequestExecutor.BasicExecutor;
-import RequestExecutor.Common;
+import Common.Template;
 import RequestExecutor.StaticResourceHandler;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.Timer;
 import java.util.TimerTask;
 
 public class ClientHandler implements Runnable {
@@ -57,11 +53,12 @@ public class ClientHandler implements Runnable {
                     if (line.isEmpty())
                         break;
                 }
-
-
                 if (sb.toString().equals("")) return;
 
+                System.out.println(sb.toString());
+
                 HttpRequest request = Util.String2Request(sb.toString());
+
                 if (request.getHeaders().getValue("Keep-Alive") != null) {
                     String timeout = request.getHeaders().getValue("Keep-Alive");
                     if (timerTask != null) {
@@ -96,39 +93,35 @@ public class ClientHandler implements Runnable {
                 HttpResponse response = null;
                 BasicExecutor executor = null;
 
-                // 如果服务器内部错误，无法完成请求，则 500: 服务器内部错误
-                if (!ServerSwitch) {
-                    response = Common.generateStatusCode_500();
+                // 如果请求一个静态资源，调用StaticResourceHandler
+                if (StaticResourceHandler.isStaticTarget(target) && method.toLowerCase().equals("get")) {
+                    executor = new StaticResourceHandler();
                 } else {
-                    // 如果请求一个静态资源，调用StaticResourceHandler
-                    if (StaticResourceHandler.isStaticTarget(target) && method.toLowerCase().equals("get")) {
-                        executor = new StaticResourceHandler();
-                    } else {
-                        // 否则，在持有的executor中找到合适的，用这个executor处理请求
-                        for (BasicExecutor e : SimpleServer.Executors) {
-                            if (target.endsWith(e.getUrl()) && method.toLowerCase().equals(e.getMethod().toLowerCase())) {
-                                executor = e;
-                                break;
-                            }
+                    // 否则，在持有的executor中找到合适的，用这个executor处理请求
+                    for (BasicExecutor e : SimpleServer.Executors) {
+                        if (target.endsWith(e.getUrl()) && method.toLowerCase().equals(e.getMethod().toLowerCase())) {
+                            executor = e;
+                            break;
                         }
-                    }
-
-                    // 找不到合适的executor
-                    // 404: 没有对应的url 405: 有对应的url但是没有对应的method
-                    if (executor == null) {
-                        response = Common.generateStatusCode_404();
-                        //todo 针对post静态资源会出现bug，不一定是404
-                        for (BasicExecutor e : SimpleServer.Executors) {
-                            if (target.endsWith(e.getUrl())) {
-                                response = Common.generateStatusCode_405();
-                                break;
-                            }
-                        }
-
-                    } else {
-                        response = executor.handle(request);
                     }
                 }
+
+                // 找不到合适的executor
+                // 404: 没有对应的url 405: 有对应的url但是没有对应的method
+                if (executor == null) {
+                    response = Template.generateStatusCode_404();
+                    //todo 针对post静态资源会出现bug，不一定是404
+                    for (BasicExecutor e : SimpleServer.Executors) {
+                        if (target.endsWith(e.getUrl())) {
+                            response = Template.generateStatusCode_405();
+                            break;
+                        }
+                    }
+
+                } else {
+                    response = executor.handle(request);
+                }
+
 
                 outToClient.write(response.ToBytes());
                 //timer 如果再次收到请求，重置timer，否则就关闭
@@ -136,6 +129,10 @@ public class ClientHandler implements Runnable {
             }
 //            outToClient.close();
         } catch (Exception e) {
+            HttpResponse response = Template.generateStatusCode_500();
+            try {
+                outToClient.write(response.ToBytes());
+            }catch (Exception ee){}
             e.printStackTrace();
         }
     }

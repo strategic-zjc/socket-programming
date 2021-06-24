@@ -1,11 +1,11 @@
 package RequestExecutor;
 
+import Common.Template;
 import Http.Components.Body;
 import Http.Components.Headers;
 import Http.Components.StatusLine;
 import Http.HttpRequest;
 import Http.HttpResponse;
-import Server.SimpleServer;
 
 import java.util.HashMap;
 
@@ -48,10 +48,10 @@ public class LoginExecutor extends BasicExecutor{
 
             if (db.containsKey(username) && db.get(username).equals(password)) {
                 String hint = "You have successfully login in!";
-                response = Common.generateStatusCode_200(hint);
+                response = Template.generateStatusCode_200(hint);
             } else {
                 String hint = "login failed";
-                response = Common.generateStatusCode_200(hint);
+                response = Template.generateStatusCode_200(hint);
             }
         }
 

@@ -1,8 +1,8 @@
 package RequestExecutor;
 
+import Common.Template;
 import Http.Components.Body;
 import Http.Components.Headers;
-import Http.Components.StatusLine;
 import Http.HttpRequest;
 import Http.HttpResponse;
 
@@ -26,7 +26,7 @@ public class RegisterExecutor extends BasicExecutor{
         Body body = request.getBody();
 
         if(!contentType.equals("application/x-www-form-urlencoded")){
-            response = Common.generateStatusCode_405();
+            response = Template.generateStatusCode_405();
             return response;
         }
 
@@ -44,15 +44,15 @@ public class RegisterExecutor extends BasicExecutor{
             }
         }
         if(username == null || password == null){
-            response = Common.generateStatusCode_405();
+            response = Template.generateStatusCode_405();
         }else {
             if (!db.containsKey(username)) {
                 db.put(username, password);
-                String hint = "You have successfully registered!";
-                response = new HttpResponse(new StatusLine(1.1, 200, "OK"), new Headers(), new Body(hint));
+                String hint = "You have successfully register!";
+                response = Template.generateStatusCode_200(hint);
             } else {
-                String hint = "Username duplicated";
-                response = new HttpResponse(new StatusLine(1.1, 200, "OK"), new Headers(), new Body(hint));
+                String hint = "You have successfully register!";
+                response = Template.generateStatusCode_200(hint);
             }
         }
 
