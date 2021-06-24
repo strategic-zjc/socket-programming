@@ -6,7 +6,6 @@ import Http.Components.StatusLine;
 import Http.HttpRequest;
 import Http.HttpResponse;
 import StatusCode.StatusCode;
-import jdk.internal.util.xml.impl.Pair;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,8 +15,7 @@ public class StaticResourceHandler extends BasicExecutor {
 
     public static HashMap<String, String> MovedPermanentlyResource = new HashMap<>();
     public static HashMap<String, String> MovedTemporarilyResource = new HashMap<>();
-    // todo:304状态码
-
+    //todo:304状态码
     public static HashMap<String, String> ModifiedTime = new HashMap<>();
 
     public StaticResourceHandler() {
@@ -43,8 +41,6 @@ public class StaticResourceHandler extends BasicExecutor {
             target = MovedPermanentlyResource.get(target);
         }
         else if (MovedTemporarilyResource.containsKey(target)) {
-            /*String hint = "The resource is temporarily moved to http://localhost:5000" + MovedTemporarilyResource.get(target);
-            return new HttpResponse(new StatusLine(1.1, 302, "Found"), new Headers(), new Body(hint));*/
             statusLine = new StatusLine(1.1, StatusCode.FOUND.getCode(), "Found");
             target = MovedTemporarilyResource.get(target);
         }
@@ -71,7 +67,7 @@ public class StaticResourceHandler extends BasicExecutor {
             fis.close();
         } catch (Exception e) {
             e.printStackTrace();
-            return new HttpResponse(new StatusLine(1.1, 404, "Not Found"), new Headers(), new Body());
+            return new HttpResponse(new StatusLine(1.1, StatusCode.NOT_FOUND.getCode(), "Not Found"), new Headers(), new Body());
         }
 
 
@@ -79,5 +75,4 @@ public class StaticResourceHandler extends BasicExecutor {
 
         return new HttpResponse(statusLine, headers, body);
     }
-
 }

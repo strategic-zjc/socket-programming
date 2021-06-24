@@ -26,7 +26,7 @@ public class RegisterExecutor extends BasicExecutor{
         Body body = request.getBody();
 
         if(!contentType.equals("application/x-www-form-urlencoded")){
-            response = new HttpResponse(new StatusLine(1.1, 400, "Bad Request"), new Headers(), new Body());
+            response = Common.generateStatusCode_405();
             return response;
         }
 
@@ -44,7 +44,7 @@ public class RegisterExecutor extends BasicExecutor{
             }
         }
         if(username == null || password == null){
-            response = new HttpResponse(new StatusLine(1.1, 400, "Bad Request"), new Headers(), new Body());
+            response = Common.generateStatusCode_405();
         }else {
             if (!db.containsKey(username)) {
                 db.put(username, password);

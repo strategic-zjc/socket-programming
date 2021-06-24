@@ -3,6 +3,8 @@ package Server;
 import RequestExecutor.BasicExecutor;
 import RequestExecutor.LoginExecutor;
 import RequestExecutor.RegisterExecutor;
+import RequestExecutor.StaticResourceHandler;
+
 import java.util.Timer;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
@@ -22,7 +24,7 @@ public class SimpleServer {
 
         Executors.add(new LoginExecutor());
         Executors.add(new RegisterExecutor());
-
+       // Executors.add(new StaticResourceHandler());
         try {
             ServerSocket serverSocket = new ServerSocket(5000);// 先创建一个
             System.out.println("http://localhost:5000");
@@ -33,8 +35,6 @@ public class SimpleServer {
                 Thread readThread = new Thread(new ClientHandler(socket));
 
                 readThread.start();
-
-
                 System.out.println("Got a connection from " + socket.getInetAddress().getHostAddress());
             }
         }catch (Exception e){

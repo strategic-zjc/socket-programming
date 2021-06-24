@@ -21,6 +21,20 @@ public class Common {
         Body body = new Body(html_200);
         return new HttpResponse(statusLine, headers, body);
     }
+    public static HttpResponse generateStatusCode_404(){
+        StatusLine statusLine = new StatusLine(1.1, StatusCode.NOT_FOUND.getCode(), "404 Method Not Allowed");
+        Headers headers = new Headers();
+        String html404 = "<html>\n" +
+                "<head><title>404 Not Found</title></head>\n" +
+                "<body bgcolor=\"white\">\n" +
+                "<center><h1>404 Not Found</h1><h6>simple http-server<h6></center>\n" +
+                "</body>\n" +
+                "</html>";
+        headers.addHeader("Content-Type", "text/html");
+        headers.addHeader("Content-Length", Long.toString(html404.length()));
+        Body body = new Body(html404);
+        return new HttpResponse(statusLine, headers, body);
+    }
 
     public static HttpResponse generateStatusCode_405(){
         StatusLine statusLine = new StatusLine(1.1, StatusCode.METHOD_NOT_ALLOWED.getCode(),"405 Method Not Allowed");

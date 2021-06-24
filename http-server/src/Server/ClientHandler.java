@@ -116,13 +116,15 @@ public class ClientHandler implements Runnable {
                     // 找不到合适的executor
                     // 404: 没有对应的url 405: 有对应的url但是没有对应的method
                     if (executor == null) {
-                        response = new HttpResponse(new StatusLine(1.1, 404, "Not Found"), new Headers(), new Body());
+                        response = Common.generateStatusCode_404();
+                        //todo 针对post静态资源会出现bug，不一定是404
                         for (BasicExecutor e : SimpleServer.Executors) {
                             if (target.endsWith(e.getUrl())) {
-                                response = new HttpResponse(new StatusLine(1.1, 405, "Method Not Allowed"), new Headers(), new Body());
+                                response = Common.generateStatusCode_405();
                                 break;
                             }
                         }
+
                     } else {
                         response = executor.handle(request);
                     }
