@@ -28,6 +28,7 @@ public class RedirectResponseFactory {
         ResponseLine responseLine = new ResponseLine(RequsetLine.DEFAULT_HTTP_VERSION, 301, StatusCode.Moved_Permanently_STR);
         MessageHeader messageHeader = new MessageHeader();
         messageHeader.put(Header.Location,newURI);
+        messageHeader.put("LocalMessage","Just for log");
         return new HttpResponse(responseLine, messageHeader, new MessageBody());
     }
 }

@@ -43,7 +43,7 @@ public class History {
             MessageHistoryInfo m = new MessageHistoryInfo(logLevel,msg);
             historyInfos.add(m);
             if(printRealTime){
-                printLog(m, logLevel);
+                printLog(m, this.logLevel);
             }
         }
     }

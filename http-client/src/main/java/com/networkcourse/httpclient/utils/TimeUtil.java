@@ -13,7 +13,7 @@ public class TimeUtil {
     /**
      * Fri, 12 May 2006 18:53:33 GMT
      */
-    public static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss 'GMT'", Locale.ENGLISH);
+    public static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.ENGLISH);
     public static long getTimestamp(String time) throws ParseException {
         return simpleDateFormat.parse(time).getTime();
     }

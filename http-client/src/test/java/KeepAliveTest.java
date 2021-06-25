@@ -9,8 +9,6 @@ import com.networkcourse.httpclient.message.component.commons.MessageBody;
 import com.networkcourse.httpclient.message.component.commons.MessageHeader;
 import com.networkcourse.httpclient.message.component.request.Method;
 import com.networkcourse.httpclient.message.component.request.RequsetLine;
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -18,18 +16,20 @@ import java.net.URISyntaxException;
 import java.text.ParseException;
 
 /**
+ * 测试长连接
  * @author fguohao
- * @date 2021/05/31
+ * @date 2021/06/25
  */
-
-public class GetTest {
+public class KeepAliveTest {
     Client client = new Client();
-
-    private void normal(String path) throws URISyntaxException {
+    private void normal(String path,boolean enableAlive) throws URISyntaxException {
         RequsetLine requsetLine = new RequsetLine(Method.GET,path);
         MessageHeader messageHeader = new MessageHeader();
         messageHeader.put(Header.Host,"localhost:5000");
-        messageHeader.put(Header.Connection,"keep-alive");
+        if(enableAlive){
+            messageHeader.put(Header.Connection,"keep-alive");
+        }
+        messageHeader.put(Header.Content_Length,"0");
         MessageBody messageBody = new MessageBody();
         HttpRequest httpRequest = new HttpRequest(requsetLine,messageHeader, messageBody);
         try {
@@ -49,18 +49,15 @@ public class GetTest {
     }
 
     @Test
-    public void testGet1() throws URISyntaxException {
-        //client.setLogLevel(History.LOG_LEVEL_DETAIL);
-        //client.setLogLevel(History.LOG_LEVEL_INFO);
-        //client.setLogLevel(History.LOG_LEVEL_WARNING);
-        client.setLogLevel(History.LOG_LEVEL_ERROR);
-        normal("/movedPic.png");
-        normal("/movedIndex.html");
-        normal("/movedIndex2.html");
-        normal("/movedPic.png");
-        normal("/pic.png");
-        normal("/index.html");
+    public void keepalivetest() throws URISyntaxException {
+        client.setLogLevel(History.LOG_LEVEL_INFO);
+        //连续调用6次同一请求，其中前三次不携带keep-alive头，后三次携带keep-alive头
+        normal("/favicon.ico",false);
+        normal("/favicon.ico",false);
+        normal("/favicon.ico",false);
+        normal("/favicon.ico",true);
+        //此后复用上次创建的连接，所以client server created只有4次
+        normal("/favicon.ico",true);
+        normal("/favicon.ico",true);
     }
-
-
 }

@@ -40,10 +40,10 @@ public class Client {
         HttpResponse httpResponse = null;
         try {
             HttpRequest refactedHttpRequest = requestHandler.handle(httpRequest);
-            ClientServer clientServer = this.clientPool.sendHttpRequest(httpRequest);
+            ClientServer clientServer = this.clientPool.sendHttpRequest(refactedHttpRequest);
             httpResponse = this.responseHandler.handle(httpRequest,clientServer.getRecvStream());
             if(!httpRequest.isKeepAlive()){
-                clientServer.closeConnection();
+                clientPool.removeConnection(httpRequest.getHost());
             }
             return httpResponse;
         } catch (IOException | InvalidHttpRequestException e) {
@@ -57,7 +57,6 @@ public class Client {
             try {
                 HttpRequest httpRequest = new HttpRequest(System.in);
                 HttpResponse httpResponse = this.sendHttpRequest(httpRequest);
-                System.out.println(httpResponse);
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (URISyntaxException e) {
@@ -70,6 +69,10 @@ public class Client {
                 e.printStackTrace();
             }
         }
+    }
+
+    public void setLogLevel(int logLevel){
+        history.setLogLevel(logLevel);
     }
 
 

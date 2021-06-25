@@ -27,7 +27,7 @@ public class InputStreamReaderHelper {
                     byteArrayList.add((byte)(temp&0xff));
                     continue;
                 }
-            }
+            }else if(temp==-1){continue;}
             byteArrayList.add((byte)(temp&0xff));
         }
 

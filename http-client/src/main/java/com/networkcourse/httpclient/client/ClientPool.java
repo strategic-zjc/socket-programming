@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 /**
- * only support absoulte uri and path
+ * 使用连接池对现在持有的所有连接进行管理
  * @author fguohao
  * @date 2021/05/28
  */
@@ -56,10 +56,15 @@ public class ClientPool {
         Boolean keepAlive = httpRequest.isKeepAlive();
         clientServer = new ClientServer(destination, port, keepAlive);
         history.addLog("ClientServer Created, destination="+destination+" ,port="+port+" ,keepAlive="+keepAlive,History.LOG_LEVEL_INFO);
-        if(keepAlive){
-            clientServerHashMap.put(hostString,clientServer);
-        }
+        clientServerHashMap.put(hostString,clientServer);
         clientServer.create();
         return clientServer;
+    }
+    public void removeConnection(String hostString) throws IOException {
+        ClientServer cs = clientServerHashMap.get(hostString);
+        if(cs!=null){
+            cs.closeConnection();
+        }
+        clientServerHashMap.remove(hostString);
     }
 }

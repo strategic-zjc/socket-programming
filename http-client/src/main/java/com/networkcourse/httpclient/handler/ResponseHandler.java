@@ -59,23 +59,24 @@ public class ResponseHandler {
         messageHeader = new MessageHeader(inputStream);
         messageBody = new MessageBody( inputStream , messageHeader);
         httpResponse =  new HttpResponse(responseLine,messageHeader,messageBody);
-        history.addHistory(httpRequest, httpResponse);//log
         switch (responseLine.getStatusCode()){
             case StatusCode.Moved_Permanently:
+                history.addHistory(httpRequest, httpResponse);//log
                 httpRequest = handleMovedPermanently(httpRequest,httpResponse);
                 return client.sendHttpRequest(httpRequest);
             case StatusCode.Found:
+                history.addHistory(httpRequest, httpResponse);//log
                 httpRequest = handleMoved(httpRequest,httpResponse);
                 return client.sendHttpRequest(httpRequest);
             case StatusCode.Not_Modified:
-                messageBody = handleLocalStorage(httpRequest);
+                messageBody.setBody(handleLocalStorage(httpRequest).getBody()); ;
                 history.addLog("Add not modified body to this new response",History.LOG_LEVEL_INFO);
                 break;
             default:;
         }
         // add to localstorage
         String modifiedTime = messageHeader.get(Header.Last_Modified);
-        if(modifiedTime!=null){
+        if(modifiedTime!=null&&responseLine.getStatusCode()!=StatusCode.Not_Modified){
             String contentType = messageHeader.get(Header.Content_Type);
             String uri = httpRequest.getRequsetLine().getRequestURI();
             String path = httpRequest.getPath();
@@ -83,7 +84,7 @@ public class ResponseHandler {
             clientModifiedCache.putModified(host,path,modifiedTime,messageBody,contentType);
             history.addLog("Add a Modified Cache entry and save the body in cache, path="+host+path, History.LOG_LEVEL_INFO);
         }
-
+        history.addHistory(httpRequest, httpResponse);//log
         return httpResponse;
     }
 

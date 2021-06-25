@@ -67,10 +67,10 @@ public class MessageBody {
                     return new String(this.body);
                 }
             }else{
-                return "byte body not supported\r\n";
+                return "byte body not supported to show here\r\n";
             }
         }
-       return "byte body not supported\r\n";
+       return "byte body not supported to show here\r\n";
     }
 
     public void save(String path) throws IOException {

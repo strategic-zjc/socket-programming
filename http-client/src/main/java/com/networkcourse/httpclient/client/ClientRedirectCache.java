@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 /**
+ * 重定向本地缓存
  * @author fguohao
  * @date 2021/05/30
  */
