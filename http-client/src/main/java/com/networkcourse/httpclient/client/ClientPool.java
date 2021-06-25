@@ -3,6 +3,7 @@ package com.networkcourse.httpclient.client;
 import com.networkcourse.httpclient.exception.MissingHostException;
 import com.networkcourse.httpclient.exception.UnsupportedHostException;
 import com.networkcourse.httpclient.handler.RequestHandler;
+import com.networkcourse.httpclient.history.History;
 import com.networkcourse.httpclient.message.HttpRequest;
 import com.networkcourse.httpclient.message.HttpResponse;
 import com.networkcourse.httpclient.message.component.commons.Header;
@@ -22,17 +23,10 @@ import java.util.LinkedHashMap;
  */
 public class ClientPool {
 
-    private static ClientPool INSTANCE;
+    History history;
 
-    private ClientPool(){
-
-    }
-
-    public static ClientPool getINSTANCE(){
-        if(INSTANCE==null){
-            INSTANCE=new ClientPool();
-        }
-        return INSTANCE;
+    public ClientPool(History history) {
+        this.history = history;
     }
 
     HashMap<String, ClientServer> clientServerHashMap = new LinkedHashMap<>();
@@ -41,27 +35,11 @@ public class ClientPool {
     public ClientServer sendHttpRequest(HttpRequest httpRequest) throws MissingHostException, UnsupportedHostException, IOException, URISyntaxException {
         ClientServer clientServer = createClientServer(httpRequest);
         clientServer.getSendStream().write(httpRequest.toBytes());
-
         return clientServer;
     }
 
     public ClientServer createClientServer(HttpRequest httpRequest) throws MissingHostException, UnsupportedHostException, URISyntaxException {
-        String hostString = null;
-        if(!httpRequest.getRequsetLine().getRequestURI().startsWith("/")){
-            URI uri = new URI(httpRequest.getRequsetLine().getRequestURI());
-            hostString = uri.getHost();
-            int port = uri.getPort();
-            if(hostString.isEmpty()){
-                //todo some error occurred
-                throw new MissingHostException();
-            }
-            if(port!=80){
-                //todo some error occurred
-            }
-        }else{
-            hostString = httpRequest.getMessageHeader().get(Header.Host);
-        }
-
+        String hostString = httpRequest.getHost();
         if(hostString==null){
             throw new MissingHostException();
         }
@@ -73,13 +51,11 @@ public class ClientPool {
                 return clientServer;
             }
         }
-        Host host = new Host(hostString);
-        Integer port = 80;
-        if(host.getPort()!=-1) {
-            port = host.getPort();
-        }
+        String destination = httpRequest.getDestination();
+        Integer port = httpRequest.getPort()==null?80: httpRequest.getPort();
         Boolean keepAlive = httpRequest.isKeepAlive();
-        clientServer = new ClientServer(host.getHost(), port, keepAlive);
+        clientServer = new ClientServer(destination, port, keepAlive);
+        history.addLog("ClientServer Created, destination="+destination+" ,port="+port+" ,keepAlive="+keepAlive,History.LOG_LEVEL_INFO);
         if(keepAlive){
             clientServerHashMap.put(hostString,clientServer);
         }

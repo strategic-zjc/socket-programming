@@ -54,4 +54,10 @@ public class HttpResponse {
 
         return sb.toString();
     }
+
+    public void saveBody(String path) throws IOException {
+        messageBody.save(path);
+    }
+
+
 }

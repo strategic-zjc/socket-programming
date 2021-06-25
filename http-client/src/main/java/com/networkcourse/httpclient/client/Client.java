@@ -1,9 +1,11 @@
 package com.networkcourse.httpclient.client;
 
+import com.networkcourse.httpclient.exception.InvalidHttpRequestException;
 import com.networkcourse.httpclient.exception.MissingHostException;
 import com.networkcourse.httpclient.exception.UnsupportedHostException;
 import com.networkcourse.httpclient.handler.RequestHandler;
 import com.networkcourse.httpclient.handler.ResponseHandler;
+import com.networkcourse.httpclient.history.History;
 import com.networkcourse.httpclient.message.HttpRequest;
 import com.networkcourse.httpclient.message.HttpResponse;
 
@@ -16,20 +18,35 @@ import java.text.ParseException;
  * @date 2021/05/31
  */
 public class Client {
+    History history ;
+    ClientRedirectCache clientRedirectCache ;
+    ClientModifiedCache clientModifiedCache ;
+    ClientPool clientPool;
+    RequestHandler requestHandler;
+    ResponseHandler responseHandler ;
 
-    ClientModifiedCache clientModifiedCache = ClientModifiedCache.getINSTANCE();
-    ClientRedirectCache clientRedirectCache = ClientRedirectCache.getINSTANCE();
+    public Client(){
+        clientRedirectCache = new ClientRedirectCache();
+        clientModifiedCache = new ClientModifiedCache();
+        history = new History();
+        clientPool = new ClientPool(history);
+        requestHandler = new RequestHandler(clientRedirectCache,clientModifiedCache,history);
+        responseHandler = new ResponseHandler(clientRedirectCache, clientModifiedCache,this,history);
+    }
 
-    ClientPool clientPool = ClientPool.getINSTANCE();
 
-    RequestHandler requestHandler = RequestHandler.getINSTANCE();
-    ResponseHandler responseHandler = ResponseHandler.getINSTANCE();
 
     public HttpResponse sendHttpRequest(HttpRequest httpRequest) throws URISyntaxException, MissingHostException, UnsupportedHostException, ParseException {
         HttpResponse httpResponse = null;
         try {
-            httpResponse=requestHandler.handle(httpRequest);
-        } catch (IOException e) {
+            HttpRequest refactedHttpRequest = requestHandler.handle(httpRequest);
+            ClientServer clientServer = this.clientPool.sendHttpRequest(httpRequest);
+            httpResponse = this.responseHandler.handle(httpRequest,clientServer.getRecvStream());
+            if(!httpRequest.isKeepAlive()){
+                clientServer.closeConnection();
+            }
+            return httpResponse;
+        } catch (IOException | InvalidHttpRequestException e) {
             e.printStackTrace();
         }
         return httpResponse;
@@ -54,5 +71,7 @@ public class Client {
             }
         }
     }
+
+
 
 }

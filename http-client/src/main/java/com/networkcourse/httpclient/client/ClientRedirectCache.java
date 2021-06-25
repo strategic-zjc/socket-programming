@@ -1,5 +1,8 @@
 package com.networkcourse.httpclient.client;
 
+import com.networkcourse.httpclient.message.component.commons.URI;
+
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
@@ -8,29 +11,24 @@ import java.util.LinkedHashMap;
  * @date 2021/05/30
  */
 public class ClientRedirectCache {
-    private static ClientRedirectCache INSTANCE ;
-    private ClientRedirectCache(){}
 
-    public static ClientRedirectCache getINSTANCE(){
-        if(INSTANCE==null){
-            INSTANCE=new ClientRedirectCache();
-        }
-        return INSTANCE;
-    }
+    HashMap<String, HashMap<String, URI>> localStorage = new LinkedHashMap<>();
 
-    HashMap<String, HashMap<String, String>> localStorage = new LinkedHashMap<>();
-
-    public void putRedirect(String hostname, String oldPath, String newURI){
-        HashMap<String, String> hostLocalStorage = localStorage.get(hostname);
+    public void putRedirect(String hostname, String oldPath, String newURI) throws URISyntaxException {
+        HashMap<String, URI> hostLocalStorage = localStorage.get(hostname);
         if(hostLocalStorage==null){
-            hostLocalStorage = new LinkedHashMap<String, String>();
+            hostLocalStorage = new LinkedHashMap<String, URI>();
             localStorage.put(hostname, hostLocalStorage);
         }
-        hostLocalStorage.put(oldPath,newURI);
+        URI uri = new URI(newURI);
+        if(uri.getHost()==null){
+            uri.setHost(hostname);
+        }
+        hostLocalStorage.put(oldPath,uri);
     }
 
-    public String getRedirect(String hostname, String oldPath){
-        HashMap<String, String> hostLocalStorage = localStorage.get(hostname);
+    public URI getRedirect(String hostname, String oldPath){
+        HashMap<String, URI> hostLocalStorage = localStorage.get(hostname);
         if(hostLocalStorage!=null){
             return hostLocalStorage.get(oldPath);
         }

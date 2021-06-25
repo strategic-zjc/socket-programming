@@ -1,8 +1,10 @@
 package com.networkcourse.httpclient.handler;
 
+import com.networkcourse.httpclient.client.Client;
 import com.networkcourse.httpclient.client.ClientCache;
 import com.networkcourse.httpclient.client.ClientModifiedCache;
 import com.networkcourse.httpclient.client.ClientRedirectCache;
+import com.networkcourse.httpclient.exception.InvalidHttpRequestException;
 import com.networkcourse.httpclient.exception.MissingHostException;
 import com.networkcourse.httpclient.exception.UnsupportedHostException;
 import com.networkcourse.httpclient.history.History;
@@ -35,20 +37,19 @@ import java.util.zip.GZIPInputStream;
  * @date 2021/05/30
  */
 public class ResponseHandler {
-    private ClientRedirectCache clientRedirectCache = ClientRedirectCache.getINSTANCE();
-    private ClientModifiedCache clientModifiedCache = ClientModifiedCache.getINSTANCE();
-    private ResponseHandler(){}
+    private ClientRedirectCache clientRedirectCache;
+    private ClientModifiedCache clientModifiedCache;
+    private Client client;
+    private History history;
 
-    private static ResponseHandler INSTANCE;
-
-    public static ResponseHandler getINSTANCE(){
-        if(INSTANCE==null){
-            INSTANCE = new ResponseHandler();
-        }
-        return INSTANCE;
+    public ResponseHandler(ClientRedirectCache clientRedirectCache, ClientModifiedCache clientModifiedCache, Client client, History history) {
+        this.clientRedirectCache = clientRedirectCache;
+        this.clientModifiedCache = clientModifiedCache;
+        this.client = client;
+        this.history = history;
     }
 
-    public HttpResponse handle(HttpRequest httpRequest, InputStream inputStream) throws URISyntaxException, UnsupportedHostException, IOException, MissingHostException, ParseException {
+    public HttpResponse handle(HttpRequest httpRequest, InputStream inputStream) throws URISyntaxException, UnsupportedHostException, IOException, MissingHostException, ParseException, InvalidHttpRequestException {
         ResponseLine responseLine;
         MessageHeader messageHeader;
         MessageBody messageBody;
@@ -58,17 +59,17 @@ public class ResponseHandler {
         messageHeader = new MessageHeader(inputStream);
         messageBody = new MessageBody( inputStream , messageHeader);
         httpResponse =  new HttpResponse(responseLine,messageHeader,messageBody);
-        History.getINSTANCE().addHistory(httpRequest, httpResponse);//log
+        history.addHistory(httpRequest, httpResponse);//log
         switch (responseLine.getStatusCode()){
             case StatusCode.Moved_Permanently:
                 httpRequest = handleMovedPermanently(httpRequest,httpResponse);
-
-                return RequestHandler.getINSTANCE().handle(httpRequest);
+                return client.sendHttpRequest(httpRequest);
             case StatusCode.Found:
                 httpRequest = handleMoved(httpRequest,httpResponse);
-                return RequestHandler.getINSTANCE().handle(httpRequest);
+                return client.sendHttpRequest(httpRequest);
             case StatusCode.Not_Modified:
                 messageBody = handleLocalStorage(httpRequest);
+                history.addLog("Add not modified body to this new response",History.LOG_LEVEL_INFO);
                 break;
             default:;
         }
@@ -106,27 +107,11 @@ public class ResponseHandler {
         if(newLocation==null){
             //todo an error occurred
         }
-        String oldpath = null;
-        String oldHost = null;
-
-        String oldRequestURI = oldRequsetLine.getRequestURI();
-
-        if(!oldRequestURI.startsWith("/")){
-            URI u = new URI(oldRequestURI);
-            oldpath = u.getPath();
-            oldHost = u.getHost();
-            if(u.getPort()!=-1){
-                oldHost = oldHost+":"+u.getPort();
-            }
-            //todo check valid
-        }else {
-            oldpath = oldRequestURI;
-            oldHost = oldhttpRequest.getMessageHeader().get(Header.Host);
-            //todo check valid
-        }
+        String oldpath = oldhttpRequest.getPath();
+        String oldHost = oldhttpRequest.getHost();
 
         clientRedirectCache.putRedirect(oldHost, oldpath, newLocation);
-
+        history.addLog("Add a Redirect Cache entry, oldPath="+oldHost+oldpath+" , newPath="+newLocation,History.LOG_LEVEL_INFO);
         return handleMoved(oldhttpRequest, httpResponse);
     }
 
@@ -141,7 +126,7 @@ public class ResponseHandler {
             //todo an error occurred
         }
         URI newLocationURI = new URI(newLocation);
-        String host = newLocationURI.getHost();
+        String host = newLocationURI.getHost()==null?oldRequestHeader.get(Header.Host):newLocationURI.getHost();
         String path = newLocationURI.getPath();
         if(newLocationURI.getPort()!=-1){
             host = host +":"+ newLocationURI.getPort();
@@ -162,6 +147,7 @@ public class ResponseHandler {
 
 
         HttpRequest httpRequest = new HttpRequest(requsetLine, messageHeader, messageBody);
+        history.addLog("Reconstructing HttpRequest caused by redirect",History.LOG_LEVEL_INFO);
         return httpRequest;
     }
 

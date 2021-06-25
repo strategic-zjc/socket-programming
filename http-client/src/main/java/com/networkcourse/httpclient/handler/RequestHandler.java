@@ -1,6 +1,7 @@
 package com.networkcourse.httpclient.handler;
 
 import com.networkcourse.httpclient.client.*;
+import com.networkcourse.httpclient.exception.InvalidHttpRequestException;
 import com.networkcourse.httpclient.exception.MissingHostException;
 import com.networkcourse.httpclient.exception.UnsupportedHostException;
 import com.networkcourse.httpclient.history.History;
@@ -8,6 +9,7 @@ import com.networkcourse.httpclient.message.HttpRequest;
 import com.networkcourse.httpclient.message.HttpResponse;
 import com.networkcourse.httpclient.message.component.commons.Header;
 import com.networkcourse.httpclient.message.component.commons.MessageHeader;
+import com.networkcourse.httpclient.message.component.commons.URI;
 import com.networkcourse.httpclient.message.component.response.ResponseLine;
 import com.networkcourse.httpclient.message.factory.RedirectResponseFactory;
 import com.networkcourse.httpclient.utils.ByteReader;
@@ -18,7 +20,6 @@ import com.networkcourse.httpclient.utils.TimeUtil;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -31,78 +32,59 @@ import java.util.zip.GZIPInputStream;
  */
 public class RequestHandler {
 
-    private ClientRedirectCache clientRedirectCache = ClientRedirectCache.getINSTANCE();
-    private ClientModifiedCache clientModifiedCache = ClientModifiedCache.getINSTANCE();
-    private ClientPool clientPool = ClientPool.getINSTANCE();
+    private ClientRedirectCache clientRedirectCache ;
+    private ClientModifiedCache clientModifiedCache ;
+    private History history;
 
-    private static RequestHandler INSTANCE;
-
-    private RequestHandler(){
-
+    public RequestHandler(ClientRedirectCache clientRedirectCache, ClientModifiedCache clientModifiedCache,History history) {
+        this.clientRedirectCache = clientRedirectCache;
+        this.clientModifiedCache = clientModifiedCache;
+        this.history = history;
     }
 
-    public static RequestHandler getINSTANCE(){
-        if(INSTANCE==null){
-            INSTANCE=new RequestHandler();
-        }
-        return INSTANCE;
-    }
 
-    public HttpResponse handle(HttpRequest httpRequest) throws MissingHostException, UnsupportedHostException, URISyntaxException, IOException, ParseException {
+
+    public HttpRequest handle(HttpRequest httpRequest) throws MissingHostException, UnsupportedHostException, URISyntaxException, IOException, ParseException, InvalidHttpRequestException {
+        //未提供有效的request请求，抛出异常
         if(httpRequest==null){
-            System.out.println();
-            return null;
-        }
-        String requestURI = httpRequest.getRequsetLine().getRequestURI();
-        String host = null;
-        String path = null;
-        if(!requestURI.startsWith("/")){
-            URI uri = new URI(requestURI);
-            host = uri.getHost();
-            Integer port = uri.getPort();
-            if(port!=-1){
-                host = host+":"+port;
-            }
-            path = uri.getPath();
-        }else{
-            host = httpRequest.getMessageHeader().get(Header.Host);
-            path = requestURI;
+            throw new InvalidHttpRequestException("invaild httpRequest, the request is null");
         }
 
         //refering redirect
-        String newURI = clientRedirectCache.getRedirect(host, path);
-        if(newURI!=null){
-            History.getINSTANCE().addHistory(httpRequest, RedirectResponseFactory.getINSTANCE().getRedirectResponse(newURI));
-
-            httpRequest = httpRequest.clone();
-            URI uri = new URI(newURI);
-
-            host = uri.getHost();
-            if(uri.getPort()!=-1){
-                host = host+":"+uri.getPort();
-            }
-            path = uri.getPath();
-            httpRequest.getRequsetLine().setRequestURI(path);
-            httpRequest.getMessageHeader().put(Header.Host,host);
-
-            System.out.println("Get from cache");
-        }
+        httpRequest = findRedirectCache(httpRequest);
 
         //refering localStorage
-        Long timestamp =  clientModifiedCache.getModifiedTime(host,path);
-        if(timestamp!=null){
-            httpRequest.getMessageHeader().put(Header.If_Modified_Since, TimeUtil.toTimeString(timestamp));
-        }
+        httpRequest = findLastModifiedCache(httpRequest);
 
-        ClientServer clientServer = this.clientPool.sendHttpRequest(httpRequest);
-        HttpResponse httpResponse = ResponseHandler.getINSTANCE().handle(httpRequest,clientServer.getRecvStream());
-        if(!httpRequest.isKeepAlive()){
-            clientServer.closeConnection();
-        }
-        return httpResponse;
+        return httpRequest;
+
+
     }
 
+    private HttpRequest findRedirectCache(HttpRequest httpRequest){
+        String host = httpRequest.getHost();
+        String path = httpRequest.getPath();
+        URI newURI = clientRedirectCache.getRedirect(host, path);
+        if(newURI!=null){
+            history.addHistory(httpRequest, RedirectResponseFactory.getINSTANCE().getRedirectResponse(newURI.toString()));
+            httpRequest = httpRequest.clone();
+            httpRequest.getRequsetLine().setRequestURI(newURI.getPath());
+            httpRequest.getMessageHeader().put(Header.Host, newURI.getHost());
+            history.addLog("Successfully find Redirect Cache entry, oldPath="+host+path+" , newPath="+newURI.toString(),History.LOG_LEVEL_INFO);
+        }
+        return httpRequest;
+    }
 
+    private HttpRequest findLastModifiedCache(HttpRequest httpRequest){
+        String host = httpRequest.getHost();
+        String path = httpRequest.getPath();
+        Long timestamp =  clientModifiedCache.getModifiedTime(host,path);
+        if(timestamp!=null){
+            history.addLog("Successfully find Last Modified Cache entry, Path="+host+path+" , modifiedTime="+TimeUtil.toTimeString(timestamp),History.LOG_LEVEL_INFO);
+            httpRequest.getMessageHeader().put(Header.If_Modified_Since, TimeUtil.toTimeString(timestamp));
+        }
+        return httpRequest;
+    }
 
 
 }

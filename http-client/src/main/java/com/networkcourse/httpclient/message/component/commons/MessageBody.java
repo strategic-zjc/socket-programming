@@ -2,6 +2,7 @@ package com.networkcourse.httpclient.message.component.commons;
 
 import com.networkcourse.httpclient.utils.ByteReader;
 import com.networkcourse.httpclient.utils.ChunkReader;
+import com.networkcourse.httpclient.utils.FileUtil;
 import com.networkcourse.httpclient.utils.InputStreamReaderHelper;
 
 import java.io.BufferedReader;
@@ -72,6 +73,13 @@ public class MessageBody {
        return "byte body not supported\r\n";
     }
 
+    public void save(String path) throws IOException {
+        FileUtil.save(body,path);
+    }
+
+    public void readFromFile(String path) throws IOException {
+        body = FileUtil.read(path);
+    }
 
 
     @Override

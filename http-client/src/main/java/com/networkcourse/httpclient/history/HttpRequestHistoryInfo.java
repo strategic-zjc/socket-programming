@@ -10,19 +10,19 @@ import java.sql.Timestamp;
  * @author fguohao
  * @date 2021/05/30
  */
-public class HttpRequestHistoryInfo {
+public class HttpRequestHistoryInfo extends HistoryInfo{
     HttpRequest httpRequest;
     HttpResponse httpResponse;
-    Long timestamp;
 
     HttpRequestHistoryInfo(HttpRequest httpRequest,HttpResponse httpResponse){
+        super();
         this.httpRequest = httpRequest;
         this.httpResponse = httpResponse;
-        this.timestamp = System.currentTimeMillis();
+
     }
 
     @Override
     public String toString() {
-        return TimeUtil.toTimeString(timestamp)+"\r\n"+httpRequest.toString()+"\r\n"+httpResponse.toString();
+        return "Send Result:\r\nRequestBody:\r\n"+httpRequest.toString()+"ResponseBody:\r\n"+httpResponse.toString();
     }
 }

@@ -7,6 +7,8 @@ import com.networkcourse.httpclient.message.component.request.RequsetLine;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  * @author fguohao
@@ -17,16 +19,21 @@ public class HttpRequest {
     private MessageHeader messageHeader;
     private MessageBody messageBody;
 
-    public HttpRequest(RequsetLine requsetLine, MessageHeader messageHeader, MessageBody messageBody) {
+    /*以下字段不被包含在rfc规范之中，仅用于处理*/
+    private com.networkcourse.httpclient.message.component.commons.URI uri;
+
+    public HttpRequest(RequsetLine requsetLine, MessageHeader messageHeader, MessageBody messageBody) throws URISyntaxException {
         this.requsetLine = requsetLine;
         this.messageHeader = messageHeader;
         this.messageBody = messageBody;
+        this.uri = new com.networkcourse.httpclient.message.component.commons.URI(this.getRequsetLine().getRequestURI(),this.messageHeader.get(Header.Host));
     }
 
-    public HttpRequest(InputStream inputStream) throws IOException {
+    public HttpRequest(InputStream inputStream) throws IOException, URISyntaxException {
         requsetLine = new RequsetLine(inputStream);
         messageHeader = new MessageHeader(inputStream);
         messageBody = new MessageBody(inputStream,messageHeader);
+        this.uri = new com.networkcourse.httpclient.message.component.commons.URI(this.getRequsetLine().getRequestURI(),this.messageHeader.get(Header.Host));
     }
 
     public RequsetLine getRequsetLine() {
@@ -39,6 +46,22 @@ public class HttpRequest {
 
     public MessageBody getMessageBody() {
         return messageBody;
+    }
+
+    public String getHost() {
+        return this.uri.getHost();
+    }
+
+    public String getPath() {
+        return this.uri.getPath();
+    }
+
+    public Integer getPort() {
+        return this.uri.getPort();
+    }
+
+    public String getDestination() {
+        return this.uri.getDestination();
     }
 
     @Override
@@ -81,8 +104,17 @@ public class HttpRequest {
         return connection.equals("keep-alive");
     }
 
+    public void readBodyFromFile(String path) throws IOException {
+        messageBody.readFromFile(path);
+    }
+
     @Override
     public HttpRequest clone(){
-        return new HttpRequest(this.requsetLine.clone(), this.messageHeader.clone(), this.messageBody.clone());
+        try {
+            return new HttpRequest(this.requsetLine.clone(), this.messageHeader.clone(), this.messageBody.clone());
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

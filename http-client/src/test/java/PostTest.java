@@ -22,7 +22,6 @@ import java.text.ParseException;
 public class PostTest {
 
     Client client = new Client();
-    History history = History.getINSTANCE();
     String usernameandpa="username=admin&password=123456";
     @Test
     public void testPost(){
@@ -40,10 +39,9 @@ public class PostTest {
             e.printStackTrace();
         }
 
-        history.printHistory();
     }
 
-    private HttpRequest normal(String path){
+    private HttpRequest normal(String path) throws URISyntaxException {
         RequsetLine requsetLine = new RequsetLine(Method.POST,path);
         MessageHeader messageHeader = new MessageHeader();
         messageHeader.put(Header.Host,"localhost:5000");
@@ -58,7 +56,6 @@ public class PostTest {
 
     public void postTest1() throws MissingHostException, UnsupportedHostException, ParseException, URISyntaxException {
         HttpRequest httpRequest  =normal("/login");
-        System.out.println(new String(httpRequest.toBytes()));
         client.sendHttpRequest(httpRequest);
     }
 

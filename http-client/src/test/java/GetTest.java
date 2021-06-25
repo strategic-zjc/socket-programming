@@ -3,6 +3,7 @@ import com.networkcourse.httpclient.exception.MissingHostException;
 import com.networkcourse.httpclient.exception.UnsupportedHostException;
 import com.networkcourse.httpclient.history.History;
 import com.networkcourse.httpclient.message.HttpRequest;
+import com.networkcourse.httpclient.message.HttpResponse;
 import com.networkcourse.httpclient.message.component.commons.Header;
 import com.networkcourse.httpclient.message.component.commons.MessageBody;
 import com.networkcourse.httpclient.message.component.commons.MessageHeader;
@@ -12,6 +13,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.text.ParseException;
 
@@ -22,20 +24,17 @@ import java.text.ParseException;
 
 public class GetTest {
     Client client = new Client();
-    History history = History.getINSTANCE();
-    @After
-    public void printHistory(){
-        history.printHistory();
-    }
 
-    private void normal(String path){
+    private void normal(String path) throws URISyntaxException {
         RequsetLine requsetLine = new RequsetLine(Method.GET,path);
         MessageHeader messageHeader = new MessageHeader();
         messageHeader.put(Header.Host,"localhost:5000");
+        messageHeader.put(Header.Connection,"keep-alive");
         MessageBody messageBody = new MessageBody();
         HttpRequest httpRequest = new HttpRequest(requsetLine,messageHeader, messageBody);
         try {
-            client.sendHttpRequest(httpRequest);
+            HttpResponse httpResponse  = client.sendHttpRequest(httpRequest);
+            httpResponse.saveBody(path.substring(1));
         } catch (URISyntaxException e) {
             e.printStackTrace();
         } catch (MissingHostException e) {
@@ -44,38 +43,20 @@ public class GetTest {
             e.printStackTrace();
         } catch (ParseException e) {
             e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
     @Test
-    public void testGet1(){
+    public void testGet1() throws URISyntaxException {
         normal("/movedPic.png");
-    }
-
-
-    @Test
-    public void testGet2(){
         normal("/movedIndex.html");
-    }
-
-    @Test
-    public void testGet3(){
         normal("/movedIndex2.html");
-    }
-
-    @Test
-    public void testGet4(){
         normal("/movedPic.png");
-    }
-
-    @Test
-    public void testGet5(){
         normal("/pic.png");
+        normal("/index.html");
     }
 
-    @Test
-    public void testGet6(){
-        normal("/index.html");
-        history.printHistory();
-    }
+
 }

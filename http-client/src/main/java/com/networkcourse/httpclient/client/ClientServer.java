@@ -2,10 +2,12 @@ package com.networkcourse.httpclient.client;
 
 import com.networkcourse.httpclient.exception.MissingHostException;
 import com.networkcourse.httpclient.exception.UnsupportedHostException;
+import com.networkcourse.httpclient.history.History;
 import com.networkcourse.httpclient.message.HttpRequest;
 import com.networkcourse.httpclient.message.HttpResponse;
 import com.networkcourse.httpclient.message.component.commons.Header;
 import com.networkcourse.httpclient.message.component.commons.Host;
+import com.networkcourse.httpclient.utils.TimeUtil;
 
 import java.io.*;
 import java.net.Socket;
@@ -30,7 +32,6 @@ public class ClientServer{
         this.host = host;
         this.port = port;
         this.keepAlive = keepAlive;
-        System.out.println("new thread created");
     }
 
     public OutputStream getSendStream() {

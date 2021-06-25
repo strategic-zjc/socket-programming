@@ -4,6 +4,7 @@ import com.networkcourse.httpclient.message.HttpResponse;
 import com.networkcourse.httpclient.message.component.commons.Header;
 import com.networkcourse.httpclient.message.component.commons.MessageBody;
 import com.networkcourse.httpclient.message.component.commons.MessageHeader;
+import com.networkcourse.httpclient.message.component.commons.URI;
 import com.networkcourse.httpclient.message.component.request.RequsetLine;
 import com.networkcourse.httpclient.message.component.response.ResponseLine;
 import com.networkcourse.httpclient.message.component.response.StatusCode;

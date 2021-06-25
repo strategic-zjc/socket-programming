@@ -12,15 +12,6 @@ import java.util.LinkedHashMap;
  * @date 2021/05/31
  */
 public class ClientModifiedCache {
-    private static ClientModifiedCache INSTANCE ;
-    private ClientModifiedCache(){}
-
-    public static ClientModifiedCache getINSTANCE(){
-        if(INSTANCE==null){
-            INSTANCE=new ClientModifiedCache();
-        }
-        return INSTANCE;
-    }
 
     HashMap<String, HashMap<String, LocalStorageResource>> localStorage = new LinkedHashMap<>();
 
@@ -38,7 +29,11 @@ public class ClientModifiedCache {
     public Long getModifiedTime(String host, String path){
         HashMap<String, LocalStorageResource> sourceLocalStorage = localStorage.get(host);
         if(sourceLocalStorage!=null){
-            return sourceLocalStorage.get(path).getTimestamp();
+            LocalStorageResource l = sourceLocalStorage.get(path);
+            if(l==null) {
+                return null;
+            }
+            return l.getTimestamp();
         }
         return null;
     }
