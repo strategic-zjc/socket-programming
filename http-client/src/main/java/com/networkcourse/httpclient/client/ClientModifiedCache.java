@@ -1,5 +1,6 @@
 package com.networkcourse.httpclient.client;
 
+import com.networkcourse.httpclient.history.History;
 import com.networkcourse.httpclient.message.component.commons.MessageBody;
 import com.networkcourse.httpclient.utils.TimeUtil;
 
@@ -24,6 +25,7 @@ public class ClientModifiedCache {
         }
         LocalStorageResource localStorageResource = new LocalStorageResource(timestamp,messageBody,contentType);
         sourceLocalStorage.put(path,localStorageResource);
+
     }
 
     public Long getModifiedTime(String host, String path){

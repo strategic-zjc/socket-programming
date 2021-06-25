@@ -50,6 +50,11 @@ public class RequestHandler {
             throw new InvalidHttpRequestException("invaild httpRequest, the request is null");
         }
 
+        if(httpRequest.getMessageHeader().get(Header.Content_Length)==null){
+            httpRequest.getMessageHeader().put(Header.Content_Length,String.valueOf(httpRequest.getMessageBody().getBody().length));
+            history.addLog("Missing Length was auto added, length="+String.valueOf(httpRequest.getMessageBody().getBody().length),History.LOG_LEVEL_WARNING);
+        }
+
         //refering redirect
         httpRequest = findRedirectCache(httpRequest);
 

@@ -74,27 +74,14 @@ public class ResponseHandler {
             default:;
         }
         // add to localstorage
-        // todo add switch to enable/disable localstorage
         String modifiedTime = messageHeader.get(Header.Last_Modified);
         if(modifiedTime!=null){
             String contentType = messageHeader.get(Header.Content_Type);
             String uri = httpRequest.getRequsetLine().getRequestURI();
-            String path = null;
-            String host = null;
-            if(!uri.startsWith("/")){
-                URI u = new URI(uri);
-                path = u.getPath();
-                host = u.getHost();
-                if(u.getPort()!=-1){
-                    host = host+":"+u.getPort();
-                }
-                //todo check valid
-            }else {
-                path = uri;
-                host = httpRequest.getMessageHeader().get(Header.Host);
-                //todo check valid
-            }
+            String path = httpRequest.getPath();
+            String host = httpRequest.getHost();
             clientModifiedCache.putModified(host,path,modifiedTime,messageBody,contentType);
+            history.addLog("Add a Modified Cache entry and save the body in cache, path="+host+path, History.LOG_LEVEL_INFO);
         }
 
         return httpResponse;
@@ -105,7 +92,6 @@ public class ResponseHandler {
         String newLocation = httpResponse.getMessageHeader().get(Header.Location);
 
         if(newLocation==null){
-            //todo an error occurred
         }
         String oldpath = oldhttpRequest.getPath();
         String oldHost = oldhttpRequest.getHost();
@@ -123,7 +109,6 @@ public class ResponseHandler {
         String newLocation = httpResponse.getMessageHeader().get(Header.Location);
 
         if(newLocation==null){
-            //todo an error occurred
         }
         URI newLocationURI = new URI(newLocation);
         String host = newLocationURI.getHost()==null?oldRequestHeader.get(Header.Host):newLocationURI.getHost();
@@ -152,22 +137,9 @@ public class ResponseHandler {
     }
 
     private MessageBody handleLocalStorage(HttpRequest httpRequest) throws URISyntaxException {
-        String uri = httpRequest.getRequsetLine().getRequestURI();
-        String path = null;
-        String host = null;
-        if(!uri.startsWith("/")){
-            URI u = new URI(uri);
-            path = u.getPath();
-            host = u.getHost();
-            if(u.getPort()!=-1){
-                host = host+u.getPort();
-            }
-            //todo check valid
-        }else {
-            path = uri;
-            host = httpRequest.getMessageHeader().get(Header.Host);
-            //todo check valid
-        }
+
+        String path = httpRequest.getPath();
+        String host = httpRequest.getHost();
         return clientModifiedCache.getLocalStorage(host,path);
     }
 

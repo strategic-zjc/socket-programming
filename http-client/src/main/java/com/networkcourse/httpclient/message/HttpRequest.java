@@ -26,6 +26,7 @@ public class HttpRequest {
         this.requsetLine = requsetLine;
         this.messageHeader = messageHeader;
         this.messageBody = messageBody;
+
         this.uri = new com.networkcourse.httpclient.message.component.commons.URI(this.getRequsetLine().getRequestURI(),this.messageHeader.get(Header.Host));
     }
 
